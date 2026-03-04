@@ -1,0 +1,555 @@
+---
+title: Theme Fields (fields.json)
+description: Global theme field configuration for colors, fonts, spacing, and styles
+---
+
+The `fields.json` file defines global theme fields that content creators can customize through the HubSpot design manager. These fields control colors, fonts, spacing, buttons, and more across the entire theme.
+
+## File Location
+
+```
+theme/fields.json
+```
+
+## Structure Overview
+
+The file contains an array of field groups, each with multiple field definitions:
+
+```json
+[
+  {
+    "label": "Global colors",
+    "name": "global_colors",
+    "type": "group",
+    "children": [ /* color fields */ ]
+  },
+  {
+    "label": "Global fonts",
+    "name": "global_fonts",
+    "type": "group",
+    "children": [ /* font fields */ ]
+  }
+  // ... more groups
+]
+```
+
+## Field Groups
+
+### Global Colors
+
+Defines the primary, secondary, and tertiary color palette for the theme.
+
+<AccordionGroup>
+  <Accordion title="Primary Color">
+    ```json
+    {
+      "label": "Primary",
+      "name": "primary",
+      "type": "color",
+      "alternate_names": ["primary_color"],
+      "visibility": {
+        "hidden_subfields": {
+          "opacity": true
+        }
+      },
+      "inherited_value": {
+        "property_value_paths": {
+          "color": "brand_settings.primaryColor"
+        }
+      },
+      "default": {
+        "color": "#111827"
+      }
+    }
+    ```
+    
+    **Default:** `#111827` (dark gray)
+    
+    **Inherits from:** HubSpot brand settings primary color
+    
+    **Hidden subfields:** Opacity control
+  </Accordion>
+
+  <Accordion title="Secondary Color">
+    ```json
+    {
+      "label": "Secondary",
+      "name": "secondary",
+      "type": "color",
+      "alternate_names": ["secondary_color"],
+      "default": {
+        "color": "#F8FAFC"
+      }
+    }
+    ```
+    
+    **Default:** `#F8FAFC` (light gray)
+    
+    **Inherits from:** `brand_settings.colors[1]`
+  </Accordion>
+
+  <Accordion title="Tertiary Color">
+    ```json
+    {
+      "label": "Tertiary",
+      "name": "tertiary",
+      "type": "color",
+      "default": {
+        "color": "#FFF2E5"
+      }
+    }
+    ```
+    
+    **Default:** `#FFF2E5` (cream)
+  </Accordion>
+</AccordionGroup>
+
+### Global Fonts
+
+Defines primary (body) and secondary (heading) fonts with fallbacks.
+
+<AccordionGroup>
+  <Accordion title="Primary Font (Body)">
+    ```json
+    {
+      "label": "Primary",
+      "name": "primary",
+      "type": "font",
+      "alternate_names": ["body_font"],
+      "default": {
+        "fallback": "sans-serif",
+        "font": "Lato",
+        "font_set": "GOOGLE"
+      }
+    }
+    ```
+    
+    **Default Font:** Lato from Google Fonts
+    
+    **Fallback:** `sans-serif`
+    
+    **Usage:** Body text, paragraphs, UI elements
+  </Accordion>
+
+  <Accordion title="Secondary Font (Headings)">
+    ```json
+    {
+      "label": "Secondary",
+      "name": "secondary",
+      "type": "font",
+      "alternate_names": ["heading_font"],
+      "default": {
+        "fallback": "sans-serif",
+        "font": "Lato",
+        "font_set": "GOOGLE"
+      }
+    }
+    ```
+    
+    **Default Font:** Lato from Google Fonts
+    
+    **Fallback:** `sans-serif`
+    
+    **Usage:** Headings (h1–h6)
+  </Accordion>
+</AccordionGroup>
+
+### Spacing
+
+Controls global spacing units used throughout the theme.
+
+```json
+{
+  "label": "Global spacing",
+  "name": "global_spacing",
+  "type": "group",
+  "children": [
+    {
+      "label": "Vertical spacing",
+      "name": "vertical_spacing",
+      "type": "number",
+      "min": 0,
+      "max": 200,
+      "step": 1,
+      "suffix": "px",
+      "default": 80
+    }
+  ]
+}
+```
+
+**Default:** `80px`
+
+**Range:** 0–200px
+
+**Usage:** Section padding, content spacing
+
+### Headings
+
+Configures typography for each heading level (h1–h6).
+
+<Tabs>
+  <Tab title="H1">
+    ```json
+    {
+      "label": "H1",
+      "name": "h1",
+      "type": "font",
+      "default": {
+        "size": 52,
+        "size_unit": "px",
+        "styles": {
+          "text-decoration": "none"
+        }
+      }
+    }
+    ```
+    
+    **Default Size:** 52px
+    
+    **Text Decoration:** None
+  </Tab>
+
+  <Tab title="H2">
+    ```json
+    {
+      "label": "H2",
+      "name": "h2",
+      "type": "font",
+      "default": {
+        "size": 40,
+        "size_unit": "px"
+      }
+    }
+    ```
+    
+    **Default Size:** 40px
+  </Tab>
+
+  <Tab title="H3">
+    ```json
+    {
+      "label": "H3",
+      "name": "h3",
+      "type": "font",
+      "default": {
+        "size": 28,
+        "size_unit": "px"
+      }
+    }
+    ```
+    
+    **Default Size:** 28px
+  </Tab>
+
+  <Tab title="H4–H6">
+    - **H4:** 22px
+    - **H5:** 18px
+    - **H6:** 16px
+  </Tab>
+</Tabs>
+
+### Buttons
+
+Defines button styles including background, text, border, and corner radius.
+
+```json
+{
+  "label": "Buttons",
+  "name": "buttons",
+  "type": "group",
+  "children": [
+    {
+      "label": "Background color",
+      "name": "background_color",
+      "type": "color",
+      "default": {
+        "color": "#111827"
+      }
+    },
+    {
+      "label": "Text color",
+      "name": "text_color",
+      "type": "color",
+      "default": {
+        "color": "#ffffff"
+      }
+    },
+    {
+      "label": "Border",
+      "name": "border",
+      "type": "border",
+      "default": {
+        "top": { "width": 1, "opacity": 100, "style": "solid", "color": "#111827" },
+        "bottom": { "width": 1, "opacity": 100, "style": "solid", "color": "#111827" },
+        "left": { "width": 1, "opacity": 100, "style": "solid", "color": "#111827" },
+        "right": { "width": 1, "opacity": 100, "style": "solid", "color": "#111827" }
+      }
+    },
+    {
+      "label": "Corner radius",
+      "name": "corner_radius",
+      "type": "number",
+      "min": 0,
+      "max": 100,
+      "default": 5,
+      "suffix": "px"
+    }
+  ]
+}
+```
+
+**Defaults:**
+- Background: `#111827` (dark gray)
+- Text: `#ffffff` (white)
+- Border: 1px solid `#111827`
+- Corner radius: 5px
+
+### Forms
+
+Configures form field appearance including labels, inputs, and helper text.
+
+```json
+{
+  "label": "Forms",
+  "name": "forms",
+  "type": "group",
+  "children": [
+    {
+      "label": "Label text",
+      "name": "label_text_color",
+      "type": "color",
+      "default": {
+        "color": "#33475B"
+      }
+    },
+    {
+      "label": "Field background color",
+      "name": "field_background_color",
+      "type": "color",
+      "default": {
+        "color": "#ffffff"
+      }
+    },
+    {
+      "label": "Field text color",
+      "name": "field_text_color",
+      "type": "color",
+      "default": {
+        "color": "#33475B"
+      }
+    },
+    {
+      "label": "Field border color",
+      "name": "field_border_color",
+      "type": "color",
+      "default": {
+        "color": "#cbd6e2"
+      }
+    }
+  ]
+}
+```
+
+## Field Types Reference
+
+### Available Field Types
+
+| Type | Description | Example Use Case |
+|------|-------------|------------------|
+| `color` | Color picker with hex, RGB, RGBA | Brand colors, backgrounds, text |
+| `font` | Font family, size, weight, style | Typography settings |
+| `number` | Numeric input with min/max/step | Spacing, border radius, padding |
+| `border` | Border configuration (width, style, color) | Button borders, container borders |
+| `spacing` | Margin/padding with units | Section spacing, content padding |
+| `choice` | Dropdown select | Alignment, display options |
+| `group` | Container for related fields | Organizing settings |
+
+### Field Properties
+
+<AccordionGroup>
+  <Accordion title="Common Properties">
+    - `label` (string) — Display name in the design manager
+    - `name` (string) — Programmatic identifier (use snake_case)
+    - `type` (string) — Field type (see table above)
+    - `default` (object) — Default value
+    - `help_text` (string) — Additional guidance for editors
+  </Accordion>
+
+  <Accordion title="Visibility Control">
+    ```json
+    "visibility": {
+      "hidden_subfields": {
+        "opacity": true,
+        "size": true
+      }
+    }
+    ```
+    
+    Hide specific subfields from editors (e.g., opacity slider for colors).
+  </Accordion>
+
+  <Accordion title="Inherited Values">
+    ```json
+    "inherited_value": {
+      "property_value_paths": {
+        "color": "brand_settings.primaryColor"
+      }
+    }
+    ```
+    
+    Pull values from HubSpot brand settings automatically.
+  </Accordion>
+
+  <Accordion title="Alternate Names">
+    ```json
+    "alternate_names": ["primary_color", "accent_color"]
+    ```
+    
+    Legacy field names for backward compatibility.
+  </Accordion>
+</AccordionGroup>
+
+## Accessing Theme Fields in Templates
+
+Use the `theme` variable in HubL templates to access field values:
+
+```html
+{# Access color fields #}
+<div style="background-color: {{ theme.global_colors.primary.color }};">
+  <p style="color: {{ theme.global_colors.secondary.color }};">
+    Content
+  </p>
+</div>
+
+{# Access font fields #}
+<h1 style="
+  font-family: {{ theme.headings.h1.font }}, {{ theme.headings.h1.fallback }};
+  font-size: {{ theme.headings.h1.size }}{{ theme.headings.h1.size_unit }};
+">
+  Heading
+</h1>
+
+{# Access button styles #}
+<button style="
+  background-color: {{ theme.buttons.background_color.color }};
+  color: {{ theme.buttons.text_color.color }};
+  border-radius: {{ theme.buttons.corner_radius }}px;
+">
+  Click Me
+</button>
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use Inherited Values">
+    Connect theme fields to HubSpot brand settings so theme colors automatically sync with the portal's brand kit.
+    
+    ```json
+    "inherited_value": {
+      "property_value_paths": {
+        "color": "brand_settings.primaryColor"
+      }
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Provide Sensible Defaults">
+    Always include default values so pages look good even before customization.
+    
+    ```json
+    "default": {
+      "color": "#111827"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Hide Unnecessary Subfields">
+    Simplify the editor experience by hiding advanced controls editors don't need.
+    
+    ```json
+    "visibility": {
+      "hidden_subfields": {
+        "opacity": true
+      }
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Group Related Fields">
+    Use `group` types to organize related settings logically.
+    
+    ```json
+    {
+      "label": "Buttons",
+      "name": "buttons",
+      "type": "group",
+      "children": [ /* button fields */ ]
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Customizing Theme Fields
+
+To add custom theme fields:
+
+<Steps>
+  <Step title="Edit fields.json">
+    Add your field definition to the appropriate group or create a new group.
+    
+    ```json
+    {
+      "label": "Custom Section",
+      "name": "custom_section",
+      "type": "group",
+      "children": [
+        {
+          "label": "Accent Color",
+          "name": "accent_color",
+          "type": "color",
+          "default": {
+            "color": "#FF5733"
+          }
+        }
+      ]
+    }
+    ```
+  </Step>
+
+  <Step title="Upload to HubSpot">
+    ```bash
+    npm run upload:hubspot
+    ```
+  </Step>
+
+  <Step title="Use in templates">
+    ```html
+    <div style="border-left: 4px solid {{ theme.custom_section.accent_color.color }};">
+      Content
+    </div>
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+  Field name changes can break existing pages. If renaming a field, use `alternate_names` to maintain backward compatibility.
+</Warning>
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="theme.json Configuration" icon="file-code" href="/api/theme-json">
+    Theme metadata and responsive breakpoints
+  </Card>
+  <Card title="Theme Fields Guide" icon="palette" href="/guides/theme-fields">
+    Comprehensive guide to customizing theme fields
+  </Card>
+  <Card title="HubL Templates" icon="code" href="/development/hubl-templates">
+    Using theme fields in HubL templates
+  </Card>
+  <Card title="Styling Components" icon="paintbrush" href="/guides/styling-components">
+    Applying theme styles with Tailwind CSS
+  </Card>
+</CardGroup>

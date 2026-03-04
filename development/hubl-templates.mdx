@@ -1,0 +1,548 @@
+---
+title: HubL Templates
+description: Master HubL templating language for building dynamic HubSpot CMS templates
+---
+
+HubL (HubSpot Markup Language) is the templating language used to build dynamic, flexible templates in HubSpot CMS.
+
+## What is HubL?
+
+HubL is a templating language based on Jinja2 that allows you to:
+
+- Add dynamic content to templates
+- Create reusable template components
+- Access HubSpot data and functionality
+- Build flexible, content-editor-friendly themes
+
+## Template Structure
+
+Every HubL template starts with metadata:
+
+```html
+<!--
+  templateType: page
+  isAvailableForNewContent: true
+  label: Home
+  screenshotPath: ../images/template-previews/home.png
+-->
+```
+
+### Template Types
+
+- `page` - Standard page template
+- `blog_listing` - Blog listing page
+- `blog_post` - Blog post template
+- `global_partial` - Reusable partial
+- `none` - Base layout (not directly usable)
+
+## Template Inheritance
+
+Use `{% extends %}` to inherit from a base template:
+
+```html
+<!--
+  templateType: page
+  label: Home
+-->
+{% extends "./layouts/base.html" %}
+
+{% block body %}
+  <!-- Page content here -->
+{% endblock body %}
+```
+
+### Base Layout Example
+
+From `theme/templates/layouts/base.html`:
+
+```html
+<!--
+  templateType: none
+-->
+<!doctype html>
+<html lang="{{ html_lang }}" {{ html_lang_dir }} x-data="xDOM">
+  <head>
+    <meta charset="utf-8">
+    {% if page_meta.html_title %}
+      <title>{{ page_meta.html_title }}</title>
+    {% endif %}
+    <meta name="description" content="{{ page_meta.meta_description }}">
+    
+    {{ require_css(get_asset_url("../../css/main.css")) }}
+    
+    {{ standard_header_includes }}
+  </head>
+  <body>
+    <a href="#main-content" class="sr-only">Skip to content</a>
+
+    <div class="body-wrapper {{ builtin_body_classes }}">
+      {% block header %}
+        {% global_partial path="../partials/header.html" %}
+      {% endblock header %}
+
+      <main id="main-content" class="body-container-wrapper">
+        {% block body %}
+        {% endblock body %}
+      </main>
+
+      {% block footer %}
+        {% global_partial path="../partials/footer.html" %}
+      {% endblock footer %}
+    </div>
+    
+    {{ require_js(get_asset_url("../../js/main.js"), { position: "footer", defer: true }) }}
+    {{ standard_footer_includes }}
+  </body>
+</html>
+```
+
+## Variables and Expressions
+
+### Outputting Variables
+
+Use double curly braces:
+
+```html
+<title>{{ page_meta.html_title }}</title>
+<p>{{ content.post_body }}</p>
+<span>{{ author.display_name }}</span>
+```
+
+### Variable Filters
+
+Transform values with filters:
+
+```html
+<!-- String filters -->
+{{ name|title }}              <!-- Title case -->
+{{ text|striptags }}          <!-- Remove HTML -->
+{{ url|escape_url }}          <!-- URL encode -->
+{{ content|truncate(150) }}   <!-- Truncate text -->
+
+<!-- Date filters -->
+{{ publish_date|datetimeformat('%B %d, %Y') }}
+
+<!-- JSON escaping -->
+{{ item.question|escapejson }}
+```
+
+## Control Structures
+
+### If Statements
+
+```html
+{% if page_meta.html_title %}
+  <title>{{ page_meta.html_title }}</title>
+{% endif %}
+
+{% if brand_settings.primaryFavicon.src %}
+  <link rel="shortcut icon" href="{{ brand_settings.primaryFavicon.src }}" />
+{% endif %}
+```
+
+### If-Else
+
+```html
+{% if module.cta_link.open_in_new_tab %}
+  target="_blank"
+{% else %}
+  target="_self"
+{% endif %}
+```
+
+### For Loops
+
+```html
+{% for item in module.items %}
+  <div class="item">
+    <h3>{{ item.question }}</h3>
+    <p>{{ item.answer }}</p>
+  </div>
+{% endfor %}
+```
+
+### Loop Variables
+
+Access loop information:
+
+```html
+{% for item in module.items %}
+  <div>
+    <p>Index: {{ loop.index }}</p>        <!-- 1-based -->
+    <p>Index0: {{ loop.index0 }}</p>      <!-- 0-based -->
+    <p>First: {{ loop.first }}</p>        <!-- true/false -->
+    <p>Last: {{ loop.last }}</p>          <!-- true/false -->
+    <p>Length: {{ loop.length }}</p>      <!-- Total items -->
+  </div>
+  
+  {{ ',' if not loop.last }}  <!-- Comma separator -->
+{% endfor %}
+```
+
+### Real Example: FAQ Schema
+
+From the accordion module:
+
+```html
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for item in module.items %}
+    {
+      "@type": "Question",
+      "name": "{{ item.question|striptags|escapejson }}",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "{{ item.answer|escapejson }}"
+      }
+    }{{ ',' if not loop.last }}
+    {% endfor %}
+  ]
+}
+</script>
+```
+
+## Including Partials
+
+### Global Partials
+
+Reusable across all templates:
+
+```html
+{% global_partial path="../partials/header.html" %}
+{% global_partial path="../partials/footer.html" %}
+```
+
+### Include DND Partials
+
+Include drag-and-drop sections:
+
+```html
+{% include_dnd_partial path="../sections/hero-banner.html" %}
+{% include_dnd_partial path="../sections/call-to-action.html" %}
+```
+
+## Modules
+
+Include HubSpot modules:
+
+```html
+{% module "navigation-bar" 
+   path="../../modules/navigation-bar",
+   label="Navigation Bar",
+   no_wrapper=True 
+%}
+```
+
+### Module Variables
+
+Access module fields:
+
+```html
+{{ module.button_text }}
+{{ module.cta_link.url.href }}
+{{ module.enable_faq_schema }}
+```
+
+### Conditional Module Output
+
+```html
+{% if module.enable_faq_schema %}
+  <script type="application/ld+json">
+  <!-- Schema markup -->
+  </script>
+{% endif %}
+```
+
+## DND Areas
+
+Create drag-and-drop content areas:
+
+```html
+{% dnd_area "dnd_area"
+  label="Main section",
+  class="body-container body-container--home"
+%}
+  {% include_dnd_partial path="../sections/hero-banner.html" %}
+  {% include_dnd_partial path="../sections/row-content-img-right.html" %}
+  {% include_dnd_partial path="../sections/call-to-action.html" %}
+{% end_dnd_area %}
+```
+
+## Setting Variables
+
+Create custom variables:
+
+```html
+{% set href = module.cta_link.url.type == "EMAIL_ADDRESS" 
+  ? "mailto:" ~ module.cta_link.url.href 
+  : module.cta_link.url.href 
+%}
+
+<a href="{{ href }}">{{ module.button_text }}</a>
+```
+
+## Comments
+
+```html
+{# This is a HubL comment - won't appear in output #}
+
+{# 
+  Multi-line
+  HubL comment
+#}
+
+<!-- This is an HTML comment - will appear in output -->
+```
+
+## Asset Functions
+
+### CSS Assets
+
+```html
+{{ require_css(get_asset_url("../../css/main.css")) }}
+{{ require_css(get_asset_url("../../css/custom.css")) }}
+```
+
+### JavaScript Assets
+
+```html
+{{ require_js(get_asset_url("../../js/main.js"), {
+  position: "footer",
+  defer: true
+}) }}
+```
+
+### Image Assets
+
+```html
+<img src="{{ get_asset_url('../../images/logo.svg') }}" alt="Logo">
+```
+
+## Required Variables
+
+Every template must include:
+
+```html
+<head>
+  {{ standard_header_includes }}
+</head>
+<body>
+  {{ standard_footer_includes }}
+</body>
+```
+
+These inject:
+- Meta tags
+- HubSpot tracking code
+- Required scripts
+- Analytics
+
+## Built-in Variables
+
+### Page Variables
+
+```html
+{{ html_lang }}                    <!-- Page language -->
+{{ html_lang_dir }}                <!-- Text direction -->
+{{ page_meta.html_title }}         <!-- Page title -->
+{{ page_meta.meta_description }}   <!-- Meta description -->
+{{ builtin_body_classes }}         <!-- HubSpot body classes -->
+```
+
+### Content Variables
+
+```html
+{{ content.name }}                 <!-- Content name -->
+{{ content.post_body }}            <!-- Blog post body -->
+{{ content.post_summary }}         <!-- Blog post summary -->
+{{ content.publish_date }}         <!-- Publish date -->
+```
+
+### Author Variables
+
+```html
+{{ author.display_name }}          <!-- Author name -->
+{{ author.email }}                 <!-- Author email -->
+{{ author.avatar }}                <!-- Author avatar -->
+```
+
+## Advanced Patterns
+
+### Conditional Attributes
+
+```html
+<a href="{{ href }}"
+  {% if module.cta_link.open_in_new_tab %} target="_blank" {% endif %}
+  {% if module.cta_link.rel %} rel="{{ module.cta_link.rel|escape_attr }}" {% endif %}
+>
+  {{ module.button_text }}
+</a>
+```
+
+### Dynamic Classes
+
+```html
+<div class="
+  container
+  {% if module.full_width %}w-full{% else %}max-w-7xl{% endif %}
+  {% if module.centered %}mx-auto{% endif %}
+">
+  Content
+</div>
+```
+
+### URL Handling
+
+```html
+{% set href = module.cta_link.url.type == "EMAIL_ADDRESS" 
+  ? "mailto:" ~ module.cta_link.url.href 
+  : module.cta_link.url.href 
+%}
+
+<a href="{{ module.cta_link.url.type == "CALL_TO_ACTION" 
+  ? href 
+  : href|escape_url }}">
+  Link Text
+</a>
+```
+
+## Best Practices
+
+### Use Semantic HTML
+
+```html
+<!-- Good -->
+<article class="blog-post">
+  <header>
+    <h1>{{ content.name }}</h1>
+  </header>
+  <div>{{ content.post_body }}</div>
+</article>
+
+<!-- Avoid -->
+<div class="blog-post">
+  <div><span>{{ content.name }}</span></div>
+  <div>{{ content.post_body }}</div>
+</div>
+```
+
+### Filter User Content
+
+Always escape user-generated content:
+
+```html
+{{ user_input|striptags|escape }}
+{{ url|escape_url }}
+{{ json_value|escapejson }}
+```
+
+### Provide Fallbacks
+
+```html
+{% if page_meta.html_title or pageTitle %}
+  <title>{{ page_meta.html_title or pageTitle }}</title>
+{% endif %}
+
+<img src="{{ module.image.src or 'path/to/default.jpg' }}" alt="{{ module.image.alt }}">
+```
+
+### Keep Templates DRY
+
+Use includes and extends:
+
+```html
+<!-- Don't repeat header/footer in every template -->
+<!-- Use base.html and extend it instead -->
+
+{% extends "./layouts/base.html" %}
+
+{% block body %}
+  <!-- Only template-specific content -->
+{% endblock %}
+```
+
+### Document Complex Logic
+
+```html
+{# 
+  Check if this is an email link or external link
+  to apply proper href formatting and attributes
+#}
+{% set href = module.cta_link.url.type == "EMAIL_ADDRESS" 
+  ? "mailto:" ~ module.cta_link.url.href 
+  : module.cta_link.url.href 
+%}
+```
+
+## Debugging
+
+### Debug Tag
+
+```html
+{% debug %}
+```
+
+Outputs all available variables to the page.
+
+### Print Variables
+
+```html
+<pre>{{ module|pprint }}</pre>
+```
+
+Pretty-prints variable contents.
+
+## Common Patterns
+
+### Navigation Loop
+
+```html
+<nav>
+  {% for item in navigation %}
+    <a href="{{ item.url }}" 
+       {% if item.active %}aria-current="page"{% endif %}>
+      {{ item.label }}
+    </a>
+  {% endfor %}
+</nav>
+```
+
+### Social Links
+
+```html
+{% for social in module.social_links %}
+  <a href="{{ social.url }}" target="_blank" rel="noopener">
+    <i class="{{ social.icon }}"></i>
+    <span class="sr-only">{{ social.platform }}</span>
+  </a>
+{% endfor %}
+```
+
+### Breadcrumbs
+
+```html
+<nav aria-label="Breadcrumb">
+  <ol>
+    {% for crumb in breadcrumbs %}
+      <li>
+        {% if not loop.last %}
+          <a href="{{ crumb.url }}">{{ crumb.title }}</a>
+        {% else %}
+          <span aria-current="page">{{ crumb.title }}</span>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+</nav>
+```
+
+## Resources
+
+- [HubL Documentation](https://developers.hubspot.com/docs/cms/hubl)
+- [HubL Filter Reference](https://developers.hubspot.com/docs/cms/hubl/filters)
+- [HubL Functions Reference](https://developers.hubspot.com/docs/cms/hubl/functions)
+- [HubL Variables Reference](https://developers.hubspot.com/docs/cms/hubl/variables)
+- [Template Types](https://developers.hubspot.com/docs/cms/building-blocks/templates)

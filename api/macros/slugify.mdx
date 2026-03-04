@@ -1,0 +1,86 @@
+---
+title: slugify
+description: Convert a string into a URL-friendly slug format
+---
+
+## Overview
+
+The `slugify` macro converts any string into a URL-friendly slug by converting to lowercase, removing special characters, and replacing spaces with hyphens.
+
+## Syntax
+
+```hbs
+{{ slugify(text) }}
+```
+
+## Parameters
+
+<ParamField path="text" type="string" required>
+  The string to convert into a slug format
+</ParamField>
+
+## Return Value
+
+Returns a string formatted as a URL-friendly slug:
+- Converted to lowercase
+- HTML tags stripped
+- Spaces replaced with hyphens
+- Special characters removed (only alphanumeric, hyphens, and underscores remain)
+- Multiple consecutive hyphens collapsed to single hyphen
+- Leading and trailing hyphens removed
+
+## Usage
+
+### Import the Macro
+
+```hbs
+{% from 'path/to/slugify.html' import slugify %}
+```
+
+### Basic Example
+
+```hbs
+{{ slugify('Give me slug') }}
+```
+
+**Output:** `give-me-slug`
+
+### With Special Characters
+
+```hbs
+{{ slugify('Hello World! @#$ How are you?') }}
+```
+
+**Output:** `hello-world-how-are-you`
+
+### With HTML Tags
+
+```hbs
+{{ slugify('<h1>Title with Tags</h1>') }}
+```
+
+**Output:** `title-with-tags`
+
+### Common Use Cases
+
+```hbs
+{# Create anchor ID from heading #}
+<h2 id="{{ slugify(heading_text) }}">{{ heading_text }}</h2>
+
+{# Generate URL-friendly filenames #}
+{% set filename = slugify(page.name) ~ '.html' %}
+
+{# Create CSS class names #}
+<div class="section-{{ slugify(section.title) }}"></div>
+```
+
+## Implementation Details
+
+The macro performs the following transformations in order:
+
+1. Converts to string and lowercase
+2. Strips HTML tags
+3. Replaces whitespace characters (tabs, newlines, spaces) with hyphens
+4. Removes all non-alphanumeric characters except hyphens and underscores
+5. Collapses multiple consecutive hyphens into a single hyphen
+6. Trims hyphens from the beginning and end of the string

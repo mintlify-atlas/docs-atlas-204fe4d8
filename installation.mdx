@@ -1,0 +1,395 @@
+---
+title: Installation
+description: Complete installation guide for FreshJuice DEV including prerequisites, setup steps, and verification.
+---
+
+# Installation Guide
+
+This guide provides detailed instructions for installing FreshJuice DEV and setting up your development environment.
+
+## Prerequisites
+
+Before installing FreshJuice DEV, ensure you have the following installed and configured:
+
+### Required Software
+
+<Steps>
+  <Step title="Node.js (v22.0.0 or newer)">
+    FreshJuice DEV requires Node.js version 22.0.0 or higher.
+    
+    **Check your Node.js version:**
+    ```bash
+    node --version
+    ```
+    
+    **Install or update Node.js:**
+    
+    Download the latest version from [nodejs.org](https://nodejs.org/en/) or use a version manager:
+    
+    ```bash
+    # Using nvm (recommended)
+    nvm install 22
+    nvm use 22
+    ```
+    
+    <Info>
+      We recommend using [nvm](https://github.com/nvm-sh/nvm) (Node Version Manager) to manage Node.js versions.
+    </Info>
+  </Step>
+
+  <Step title="HubSpot CMS CLI">
+    The HubSpot CLI is required for local development and deployment.
+    
+    **Install the HubSpot CLI globally:**
+    ```bash
+    npm install -g @hubspot/cli
+    ```
+    
+    **Verify installation:**
+    ```bash
+    hs --version
+    ```
+    
+    <Note>
+      See the [HubSpot CLI documentation](https://developers.hubspot.com/docs/cms/developer-reference/local-development-cli) for more details.
+    </Note>
+  </Step>
+
+  <Step title="HubSpot Account">
+    You need access to a HubSpot account with CMS Hub permissions.
+    
+    - **CMS Hub Starter** or higher is required
+    - Ensure you have **Design Manager** access
+    - Have your **Portal ID** ready
+  </Step>
+
+  <Step title="Git (Optional but Recommended)">
+    Git is needed to clone the repository and manage version control.
+    
+    **Check if Git is installed:**
+    ```bash
+    git --version
+    ```
+    
+    **Install Git:**
+    
+    Download from [git-scm.com](https://git-scm.com/) or use your package manager:
+    
+    ```bash
+    # macOS (via Homebrew)
+    brew install git
+    
+    # Ubuntu/Debian
+    sudo apt-get install git
+    
+    # Windows (via Chocolatey)
+    choco install git
+    ```
+  </Step>
+</Steps>
+
+## Installation Steps
+
+### 1. Clone the Repository
+
+Clone the FreshJuice DEV repository to your local machine:
+
+<CodeGroup>
+
+```bash SSH
+git clone git@github.com:freshjuice-dev/freshjuice-dev-hubspot-theme.git
+cd freshjuice-dev-hubspot-theme
+```
+
+```bash HTTPS
+git clone https://github.com/freshjuice-dev/freshjuice-dev-hubspot-theme.git
+cd freshjuice-dev-hubspot-theme
+```
+
+```bash Download ZIP
+# Download the ZIP file from GitHub
+curl -L https://github.com/freshjuice-dev/freshjuice-dev-hubspot-theme/archive/refs/heads/main.zip -o freshjuice-dev.zip
+unzip freshjuice-dev.zip
+cd freshjuice-dev-hubspot-theme-main
+```
+
+</CodeGroup>
+
+### 2. Install Dependencies
+
+Install all required npm packages:
+
+```bash
+npm install
+```
+
+This will install:
+
+- **Tailwind CSS v4** – For utility-first styling
+- **Alpine.js v3** – For reactive components
+- **esbuild** – For fast JavaScript bundling
+- **Development tools** – Husky, npm-run-all, rimraf, and more
+
+<Info>
+  The installation process may take a few minutes depending on your internet connection.
+</Info>
+
+### 3. Prepare Development Environment
+
+Install Husky git hooks for code quality:
+
+```bash
+npm run prepare
+```
+
+This sets up pre-commit hooks to ensure code consistency.
+
+### 4. Authenticate with HubSpot
+
+Connect the HubSpot CLI to your HubSpot account:
+
+```bash
+hs auth
+```
+
+You'll be prompted to:
+
+1. Choose **OAuth** or **Personal Access Key** authentication
+2. Enter your **Portal ID** (found in HubSpot settings)
+3. Complete authentication in your browser
+
+<Warning>
+  Make sure you're authenticating with a HubSpot account that has CMS Hub access and Design Manager permissions.
+</Warning>
+
+### 5. Configure Upload Destination (Optional)
+
+By default, the theme uploads to `/FreshJuiceDEV` in your HubSpot portal. To change this:
+
+1. Open `package.json`
+2. Find the `upload:hubspot` and `watch:hubspot` scripts
+3. Change `/FreshJuiceDEV` to your preferred destination
+
+```json
+"scripts": {
+  "upload:hubspot": "hs upload ./theme /YourThemeName",
+  "watch:hubspot": "hs watch ./theme /YourThemeName"
+}
+```
+
+## Verify Installation
+
+Ensure everything is set up correctly:
+
+<Steps>
+  <Step title="Check Node.js and npm">
+    ```bash
+    node --version  # Should be v22.0.0 or higher
+    npm --version
+    ```
+  </Step>
+
+  <Step title="Check HubSpot CLI">
+    ```bash
+    hs --version
+    hs accounts list  # Should show your authenticated account
+    ```
+  </Step>
+
+  <Step title="Test build process">
+    ```bash
+    npm run build
+    ```
+    
+    This should:
+    - Clean temporary directories
+    - Bundle JavaScript files
+    - Compile Tailwind CSS
+    - Create a distribution ZIP
+    
+    <Info>
+      If the build completes without errors, your environment is properly configured.
+    </Info>
+  </Step>
+
+  <Step title="Test upload to HubSpot">
+    ```bash
+    npm run upload:hubspot
+    ```
+    
+    This uploads the theme to your HubSpot portal. Check the Design Manager to confirm:
+    
+    1. Go to **Marketing → Files → Design Tools**
+    2. Navigate to `/FreshJuiceDEV` (or your custom path)
+    3. Verify theme files are present
+  </Step>
+</Steps>
+
+## Development Workflow
+
+Once installed, you have several commands available:
+
+### Local Development
+
+Start the development server with hot-reload:
+
+```bash
+npm run start
+```
+
+This runs three processes in parallel:
+
+1. **Tailwind CSS watcher** – Rebuilds CSS on changes
+2. **JavaScript bundler** – Rebuilds JS on changes
+3. **HubSpot file watcher** – Auto-uploads to HubSpot
+
+<Note>
+  Leave this running while you develop. Changes will automatically sync to HubSpot.
+</Note>
+
+### Production Build
+
+Build optimized files for production:
+
+```bash
+npm run build
+```
+
+This creates:
+- Minified CSS in `theme/css/tailwind.css`
+- Bundled JavaScript in `theme/js/main.js`
+- Distribution ZIP in `_dist/` directory
+
+### Manual Upload
+
+Upload the theme without watching:
+
+```bash
+npm run upload:hubspot
+```
+
+### Individual Build Commands
+
+You can also run build steps individually:
+
+<CodeGroup>
+
+```bash Tailwind CSS
+# Build CSS once
+npm run build:tailwind
+
+# Watch CSS for changes
+npm run watch:tailwind
+```
+
+```bash JavaScript
+# Build JS once
+npm run build:js
+
+# Watch JS for changes
+npm run watch:js
+```
+
+```bash HubSpot
+# Upload to HubSpot
+npm run upload:hubspot
+
+# Watch and auto-upload
+npm run watch:hubspot
+```
+
+</CodeGroup>
+
+## Troubleshooting
+
+### Node.js Version Errors
+
+**Problem**: `Error: The engine "node" is incompatible with this module`
+
+**Solution**: Upgrade to Node.js v22.0.0 or higher:
+
+```bash
+nvm install 22
+nvm use 22
+```
+
+### HubSpot Authentication Issues
+
+**Problem**: `Error: Unauthorized` or `No valid authentication found`
+
+**Solution**: Re-authenticate with HubSpot:
+
+```bash
+hs auth
+```
+
+Make sure you select the correct portal when prompted.
+
+### Build Failures
+
+**Problem**: `npm run build` fails with errors
+
+**Solutions**:
+
+1. Clear npm cache and reinstall:
+   ```bash
+   rm -rf node_modules package-lock.json
+   npm install
+   ```
+
+2. Check for syntax errors in source files:
+   ```bash
+   npm run build:js  # Check JavaScript
+   npm run build:tailwind  # Check CSS
+   ```
+
+3. Ensure all dependencies are installed:
+   ```bash
+   npm install
+   ```
+
+### Upload Errors
+
+**Problem**: Files not uploading to HubSpot
+
+**Solutions**:
+
+1. Verify authentication:
+   ```bash
+   hs accounts list
+   ```
+
+2. Check portal permissions (need Design Manager access)
+
+3. Verify the upload path exists or create it manually in HubSpot
+
+4. Try uploading manually:
+   ```bash
+   hs upload ./theme /FreshJuiceDEV --portal=YOUR_PORTAL_ID
+   ```
+
+<Warning>
+  If you continue experiencing issues, check the [GitHub issues](https://github.com/freshjuice-dev/freshjuice-dev-hubspot-theme/issues) or open a new issue with details about your problem.
+</Warning>
+
+## Next Steps
+
+Now that FreshJuice DEV is installed, you're ready to start developing:
+
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="bolt" href="/quickstart">
+    Follow the quick start guide to create your first page.
+  </Card>
+  
+  <Card title="Project Structure" icon="folder-tree" href="/concepts/project-structure">
+    Learn about the theme's file organization.
+  </Card>
+  
+  <Card title="Configuration" icon="gear" href="/api/theme-fields">
+    Customize theme settings and behavior.
+  </Card>
+  
+  <Card title="Development Guide" icon="code" href="/development/local-setup">
+    Deep dive into theme development workflows.
+  </Card>
+</CardGroup>

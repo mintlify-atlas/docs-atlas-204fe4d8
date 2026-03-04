@@ -1,0 +1,352 @@
+---
+title: Creating Custom Sections
+description: Learn how to create custom drag-and-drop sections for FreshJuice DEV theme
+---
+
+# Creating Custom Sections
+
+Custom sections are reusable page building blocks in HubSpot's drag-and-drop editor. FreshJuice DEV provides several built-in sections that you can use as templates for creating your own.
+
+## Section Anatomy
+
+A section in FreshJuice DEV consists of a single HTML file located in `theme/sections/` with special metadata and HubL markup.
+
+### Basic Structure
+
+```html
+<!--
+  templateType: section
+  label: Your Section Name
+  isAvailableForNewContent: true
+  screenshotPath: ../images/section-previews/your-section.png
+  description: "Brief description of what this section does."
+-->
+{% dnd_section %}
+  <!-- Section content goes here -->
+{% end_dnd_section %}
+```
+
+## Section Examples
+
+### Simple Hero Banner
+
+The hero banner section (`theme/sections/hero-banner.html:1`) demonstrates a two-column layout:
+
+```html
+{% dnd_section
+  background_color={{ context.background_color or "#f8fafc" }},
+  vertical_alignment="MIDDLE"
+%}
+  {% dnd_module
+    path="@hubspot/linked_image",
+    img={
+      "alt": context.image_alt or "Hero Image",
+      "loading": context.image_loading or "disabled",
+      "max_height": context.image_height or 600,
+      "max_width": context.image_width or 600,
+      "size_type": "auto_custom_max",
+      "src": context.image or "default-image.jpg"
+    },
+    offset=0,
+    width=6
+  %}
+  {% end_dnd_module %}
+  {% dnd_column offset=6, width=6 %}
+    {% dnd_row %}
+      {% dnd_module path="@hubspot/rich_text" %}
+      {% end_dnd_module %}
+    {% end_dnd_row %}
+  {% end_dnd_column %}
+{% end_dnd_section %}
+```
+
+**Key features:**
+- Uses `context` variables for flexible content
+- 12-column grid system (width=6 means 50%)
+- Default values with `or` operator
+
+### Multi-Column Section
+
+The multi-column section (`theme/sections/multi-column-content.html:1`) shows a three-column layout:
+
+```html
+{% dnd_section
+  background_color={{ context.background_color or "#f8fafc" }},
+  vertical_alignment="MIDDLE"
+%}
+  {% dnd_column offset=0, width=4 %}
+    <!-- Column 1 content -->
+  {% end_dnd_column %}
+  {% dnd_column offset=4, width=4 %}
+    <!-- Column 2 content -->
+  {% end_dnd_column %}
+  {% dnd_column offset=8, width=4 %}
+    <!-- Column 3 content -->
+  {% end_dnd_column %}
+{% end_dnd_section %}
+```
+
+**Key features:**
+- Three equal columns (width=4 each)
+- Offset positioning for precise control
+- Lazy loading images for performance
+
+### Call-to-Action Section
+
+The CTA section (`theme/sections/call-to-action.html:1`) demonstrates background images and responsive padding:
+
+```html
+{% dnd_section
+  background_image={
+    "backgroundPosition": "MIDDLE_CENTER",
+    "backgroundSize": "cover",
+    "imageUrl": context.background_image or get_asset_url("../images/placeholder.png")
+  },
+  max_width={{ context.max_width or 700 }},
+  padding={
+    "default": {
+      "top": 140,
+      "right": 20,
+      "bottom": 160,
+      "left": 20
+    },
+    "mobile": {
+      "top": 80,
+      "right": 20,
+      "bottom": 80,
+      "left": 20
+    }
+  }
+%}
+  <!-- CTA content -->
+{% end_dnd_section %}
+```
+
+**Key features:**
+- Background image configuration
+- Responsive padding for mobile/desktop
+- Max-width constraint for content
+
+## Creating Your Own Section
+
+### Step 1: Create the File
+
+Create a new file in `theme/sections/` with a descriptive name:
+
+```bash
+touch theme/sections/my-custom-section.html
+```
+
+### Step 2: Add Metadata
+
+Start with the HTML comment block:
+
+```html
+<!--
+  templateType: section
+  label: My Custom Section
+  isAvailableForNewContent: true
+  screenshotPath: ../images/section-previews/my-custom-section.png
+  description: "Your section description here."
+-->
+```
+
+### Step 3: Build the Layout
+
+Use HubSpot's drag-and-drop tags:
+
+```html
+{% dnd_section
+  background_color={{ context.background_color or "#ffffff" }}
+%}
+  {% dnd_column width=12 %}
+    {% dnd_row %}
+      {% dnd_module path="@hubspot/rich_text" %}
+      {% end_dnd_module %}
+    {% end_dnd_row %}
+  {% end_dnd_column %}
+{% end_dnd_section %}
+```
+
+### Step 4: Add Context Variables
+
+Make your section flexible with context variables:
+
+```html
+{% dnd_module
+  path="@hubspot/rich_text",
+  html={{ context.heading or "<h2>Default Heading</h2>" }}
+%}
+{% end_dnd_module %}
+```
+
+### Step 5: Use Custom Modules
+
+Reference custom modules in your sections:
+
+```html
+{% dnd_module
+  path="../modules/button",
+  button_text={{ context.button_text or "Click Me" }}
+%}
+{% end_dnd_module %}
+```
+
+## Grid System
+
+FreshJuice DEV uses HubSpot's 12-column grid system:
+
+- **Full width**: `width=12`
+- **Half width**: `width=6`
+- **Third width**: `width=4`
+- **Quarter width**: `width=3`
+
+### Column Offset
+
+Use `offset` to position columns:
+
+```html
+{% dnd_column offset=3, width=6 %}
+  <!-- Centered 50% width column -->
+{% end_dnd_column %}
+```
+
+## Best Practices
+
+### 1. Use Context Variables
+
+Always provide default values:
+
+```html
+context.image or "default-image.jpg"
+```
+
+### 2. Optimize Image Loading
+
+Use lazy loading for below-the-fold images:
+
+```html
+"loading": "lazy"
+```
+
+Disable loading attribute for hero images:
+
+```html
+"loading": "disabled"
+```
+
+### 3. Make It Responsive
+
+Provide mobile and desktop configurations:
+
+```html
+padding={
+  "default": { "top": 80, "bottom": 80 },
+  "mobile": { "top": 40, "bottom": 40 }
+}
+```
+
+### 4. Add Preview Screenshots
+
+Create a preview image at `theme/images/section-previews/` for better UX in the page editor.
+
+### 5. Semantic HTML
+
+Use appropriate HTML elements through modules:
+
+```html
+html={{ context.content or "<h2>Heading</h2><p>Content</p>" }}
+```
+
+## Working with Custom Modules
+
+Sections often use custom modules. Reference them using relative paths:
+
+```html
+{% dnd_module path="../modules/card" %}
+{% end_dnd_module %}
+```
+
+See the Cards section (`theme/sections/cards.html:1`) for a complete example using the custom card module.
+
+## Testing Your Section
+
+1. Upload to HubSpot:
+   ```bash
+   npm run upload:hubspot
+   ```
+
+2. Open any page in the drag-and-drop editor
+
+3. Look for your section in the section selector
+
+4. Drag it onto the page to test
+
+## Advanced Techniques
+
+### Dynamic Grid Classes
+
+The card module demonstrates conditional grid classes:
+
+```html
+{% if module.card | length >= 3 %}
+  {% set grid_col_class = 'lg:grid-cols-3' %}
+{% endif %}
+```
+
+### Looping Through Content
+
+Create repeatable content blocks:
+
+```html
+{% for item in module.items %}
+  <div>{{ item.content }}</div>
+{% endfor %}
+```
+
+### Conditional Rendering
+
+Show/hide elements based on content:
+
+```html
+{% if card.image.src %}
+  <img src="{{ card.image.src }}" alt="{{ card.image.alt }}">
+{% endif %}
+```
+
+## Common Section Patterns
+
+### Hero Section Pattern
+- Full-width background
+- Centered content
+- CTA button
+- Hero image
+
+### Feature Section Pattern
+- Multiple columns
+- Icon or image per feature
+- Heading and description
+- Optional link/button
+
+### CTA Section Pattern
+- Background image or color
+- Centered heading
+- Prominent button
+- Minimal content
+
+### Content Section Pattern
+- Text and image combination
+- Alternating layouts
+- Flexible column widths
+
+## Next Steps
+
+- Learn about [creating custom modules](/guides/custom-modules)
+- Explore [performance optimization](/guides/performance-optimization)
+- Review [HubSpot's drag-and-drop documentation](https://developers.hubspot.com/docs/cms/building-blocks/sections)
+
+## Resources
+
+- Example sections: `theme/sections/`
+- Section previews: `theme/images/section-previews/`
+- HubSpot modules: [Official Documentation](https://developers.hubspot.com/docs/cms/building-blocks/modules)

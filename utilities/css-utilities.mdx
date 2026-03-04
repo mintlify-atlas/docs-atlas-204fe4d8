@@ -1,0 +1,538 @@
+---
+title: 'CSS Utilities'
+description: 'Custom CSS utilities and Tailwind CSS configuration'
+icon: 'paintbrush'
+---
+
+## Overview
+
+The FreshJuice theme uses Tailwind CSS v4 with custom configuration and utilities. The CSS architecture is organized into layers: base styles, components, and utilities, with additional custom theme tokens and design system values.
+
+## CSS Architecture
+
+### File Structure
+
+```
+source/css/
+├── tailwind.css           # Main entry point, theme configuration
+├── base/
+│   ├── reset.css          # CSS reset and normalization
+│   ├── animations.css     # Keyframe animations
+│   ├── typography.css     # Typography styles
+│   ├── forms.css          # Form element styles
+│   └── buttons.css        # Button styles
+├── components/
+│   ├── blog-comments.css  # Blog comment styles
+│   ├── yt-lite.css        # YouTube lite embed styles
+│   └── system.css         # System component styles
+└── utilities/
+    └── utils.css          # Custom utility classes
+```
+
+---
+
+## Tailwind Configuration
+
+**Location:** `source/css/tailwind.css`
+
+The main Tailwind configuration file defines custom theme tokens, content sources, and imports all style layers.
+
+### Theme Tokens
+
+#### Custom Colors
+
+```css
+@theme {
+  --color-cursor: #FFFFFF;
+  --color-cursor-500: #FFFFFF;
+  --color-terminal: #000000;
+  --color-terminal-500: #000000;
+}
+```
+
+**Usage in templates:**
+
+```html
+<!-- Using custom colors -->
+<div class="bg-cursor text-terminal">
+  Terminal-style content
+</div>
+
+<button class="bg-cursor-500 hover:bg-terminal-500">
+  Click me
+</button>
+```
+
+#### Custom Fonts
+
+```css
+@theme {
+  --font-cursive: "Caveat", cursive;
+}
+```
+
+**Usage:**
+
+```html
+<h2 class="font-cursive text-4xl">
+  Handwritten style heading
+</h2>
+```
+
+#### Custom Aspect Ratios
+
+```css
+@theme {
+  --aspect-auto: auto;
+  --aspect-box: 1;
+  --aspect-landscape: 4 / 3;
+  --aspect-portrait: 3 / 4;
+  --aspect-video: 16 / 9;
+  --aspect-widescreen: 16 / 9;
+  --aspect-ultrawide: 18 / 5;
+  --aspect-golden: 1.6180 / 1;
+  --aspect-macbook: 16 / 10;
+}
+```
+
+**Usage:**
+
+```html
+<!-- Video container with 16:9 aspect ratio -->
+<div class="aspect-video">
+  <iframe src="video-url" class="w-full h-full"></iframe>
+</div>
+
+<!-- Portrait image -->
+<img src="portrait.jpg" class="aspect-portrait object-cover" />
+
+<!-- Golden ratio container -->
+<div class="aspect-golden bg-gray-100">
+  Content with golden ratio proportions
+</div>
+
+<!-- MacBook screen aspect ratio -->
+<div class="aspect-macbook">
+  <img src="screenshot.png" class="w-full h-full object-cover" />
+</div>
+```
+
+#### Custom Spacing
+
+```css
+@theme {
+  --spacing-screenSinNav: calc(100vh - 5rem);
+}
+```
+
+**Usage:**
+
+```html
+<!-- Full screen height minus navigation -->
+<section class="h-screenSinNav">
+  Hero content that accounts for fixed navigation
+</section>
+```
+
+### Content Sources
+
+Tailwind scans these paths for class usage:
+
+```css
+@source "../../theme/**/*.html";
+@source "../../theme/**/*.js";
+@source "../js/farmerswife.js";
+@source "./**/*.css";
+```
+
+This ensures all classes used in templates, JavaScript, and CSS files are included in the final build.
+
+---
+
+## Custom Animations
+
+**Location:** `source/css/base/animations.css`
+
+### fadeIn Animation
+
+A simple opacity fade-in animation:
+
+```css
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+```
+
+**Usage:**
+
+```html
+<!-- Using with Tailwind animation utilities -->
+<div class="animate-fadeIn">
+  Content that fades in
+</div>
+
+<!-- Custom animation duration -->
+<div style="animation: fadeIn 0.5s ease-in-out;">
+  Fast fade in
+</div>
+
+<!-- Delayed fade in -->
+<div style="animation: fadeIn 1s ease-in-out 0.3s both;">
+  Fades in after 300ms delay
+</div>
+```
+
+**JavaScript integration:**
+
+```javascript
+// Add fade-in class dynamically
+element.style.animation = 'fadeIn 0.3s ease-in-out';
+
+// Or using CSS classes
+element.classList.add('animate-fadeIn');
+```
+
+---
+
+## Typography Utilities
+
+**Location:** `source/css/base/typography.css`
+
+### Balanced Headings in Articles
+
+Article headings automatically use text balancing for better readability:
+
+```css
+@layer base {
+  .article__body {
+    h1, h2, h3, h4, h5, h6 {
+      @apply text-balance;
+    }
+  }
+}
+```
+
+**Usage:**
+
+```html
+<!-- Headings within article__body automatically balance -->
+<article class="article__body">
+  <h1>This Long Heading Will Be Balanced Across Lines</h1>
+  <h2>Subheading with Better Line Breaks</h2>
+  <p>Article content...</p>
+</article>
+```
+
+The `text-balance` utility prevents awkward line breaks in headings by balancing text across multiple lines.
+
+---
+
+## Custom Utilities
+
+**Location:** `source/css/utilities/utils.css`
+
+### Available Utilities (Commented Examples)
+
+The theme includes commented utility examples that can be enabled as needed:
+
+#### Icon Utilities
+
+```css
+/* Uncomment to use */
+.icon {
+  width: 0.75em;
+  width: 1cap;
+  height: 0.75em;
+  height: 1cap;
+}
+
+.with-icon {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.with-icon .icon {
+  margin-inline-end: 1rem;
+}
+```
+
+**Usage example:**
+
+```html
+<span class="with-icon">
+  <svg class="icon" viewBox="0 0 24 24">
+    <!-- icon path -->
+  </svg>
+  Text with icon
+</span>
+```
+
+#### Container Utilities
+
+```css
+/* Uncomment to use */
+.container {
+  box-sizing: content-box;
+}
+
+.container .container {
+  box-sizing: border-box;
+  padding-left: 0;
+  padding-right: 0;
+}
+```
+
+**Purpose:** Handles nested containers by removing padding from inner containers to prevent double-padding.
+
+---
+
+## Common Patterns
+
+### Responsive Video Embeds
+
+Combine aspect ratio utilities with responsive classes:
+
+```html
+<div class="aspect-video w-full">
+  <iframe 
+    src="https://www.youtube.com/embed/VIDEO_ID"
+    class="w-full h-full"
+    frameborder="0"
+    allowfullscreen
+  ></iframe>
+</div>
+```
+
+### Hero Section with Custom Spacing
+
+Create a hero section that accounts for fixed navigation:
+
+```html
+<section class="h-screenSinNav flex items-center justify-center bg-gradient-to-br from-cursor to-terminal">
+  <div class="text-center text-white">
+    <h1 class="text-5xl font-bold mb-4">Welcome</h1>
+    <p class="text-xl">Full height hero minus navigation</p>
+  </div>
+</section>
+```
+
+### Animated Content Loading
+
+Use fadeIn animation for progressive content reveal:
+
+```html
+<!-- Initial state: hidden -->
+<div class="opacity-0" data-animate>
+  Content to animate
+</div>
+
+<script>
+  // Trigger animation when content loads
+  document.querySelectorAll('[data-animate]').forEach(el => {
+    el.style.animation = 'fadeIn 0.6s ease-in-out forwards';
+  });
+</script>
+```
+
+### Image Galleries with Aspect Ratios
+
+Create consistent image galleries:
+
+```html
+<div class="grid grid-cols-3 gap-4">
+  {% for image in images %}
+    <div class="aspect-box overflow-hidden rounded-lg">
+      <img 
+        src="{{ image.url }}"
+        alt="{{ image.alt }}"
+        class="w-full h-full object-cover hover:scale-105 transition-transform"
+      />
+    </div>
+  {% endfor %}
+</div>
+```
+
+### Article Layout
+
+Complete article layout with balanced typography:
+
+```html
+<article class="article__body max-w-3xl mx-auto px-4 py-8">
+  <header class="mb-8">
+    <h1 class="text-4xl font-bold mb-2">
+      {{ content.name }}
+    </h1>
+    <p class="text-gray-600">
+      {{ content.publish_date_localized }}
+    </p>
+  </header>
+  
+  <div class="prose prose-lg">
+    {{ content.post_body }}
+  </div>
+</article>
+```
+
+---
+
+## Extending the Theme
+
+### Adding Custom Colors
+
+Add new color tokens to `tailwind.css`:
+
+```css
+@theme {
+  /* Existing colors... */
+  
+  /* Add your custom colors */
+  --color-brand: #FF6B6B;
+  --color-brand-500: #FF6B6B;
+  --color-brand-600: #EE5A52;
+  --color-accent: #4ECDC4;
+  --color-accent-500: #4ECDC4;
+}
+```
+
+**Usage:**
+
+```html
+<button class="bg-brand hover:bg-brand-600 text-white">
+  Brand Button
+</button>
+```
+
+### Adding Custom Animations
+
+Add new keyframe animations to `base/animations.css`:
+
+```css
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+```
+
+### Creating Custom Utilities
+
+Add new utility classes to `utilities/utils.css`:
+
+```css
+@layer utilities {
+  /* Glass morphism effect */
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Text gradient */
+  .text-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Smooth scrolling */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
+}
+```
+
+---
+
+## Best Practices
+
+### 1. Use Semantic Color Names
+
+Instead of generic names, use semantic naming:
+
+```css
+/* Good */
+--color-primary: #FF6B6B;
+--color-secondary: #4ECDC4;
+
+/* Avoid */
+--color-red: #FF6B6B;
+--color-blue: #4ECDC4;
+```
+
+### 2. Leverage CSS Custom Properties
+
+Use CSS variables for dynamic theming:
+
+```css
+@theme {
+  --color-background: #FFFFFF;
+  --color-text: #000000;
+}
+
+[data-theme="dark"] {
+  --color-background: #000000;
+  --color-text: #FFFFFF;
+}
+```
+
+### 3. Keep Utility Classes Focused
+
+Each utility should do one thing well:
+
+```css
+/* Good - single purpose */
+.shadow-soft {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Avoid - multiple responsibilities */
+.card {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+```
+
+### 4. Use Tailwind's @apply Sparingly
+
+Prefer composition over extraction:
+
+```html
+<!-- Preferred -->
+<button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+  Button
+</button>
+
+<!-- Use @apply only for truly repeated patterns -->
+```
+
+### 5. Test Responsive Behavior
+
+Always test custom utilities at different breakpoints:
+
+```html
+<div class="aspect-video md:aspect-landscape lg:aspect-widescreen">
+  Responsive aspect ratio
+</div>
+```

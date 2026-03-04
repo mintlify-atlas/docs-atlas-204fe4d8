@@ -1,0 +1,139 @@
+---
+title: "main.js"
+description: "Main JavaScript entry point for FreshJuice DEV theme"
+---
+
+## Overview
+
+The `main.js` file is the primary entry point for all JavaScript functionality in the FreshJuice DEV theme. It initializes Alpine.js, registers plugins, loads utilities, and sets up the application when the DOM is ready.
+
+## Location
+
+```
+source/js/main.js
+```
+
+## Dependencies
+
+The main module imports and initializes the following dependencies:
+
+### Core Libraries
+
+- **Alpine.js** - The reactive framework powering the theme
+- **flying-pages-module** - Prefetches pages for faster navigation
+
+### Alpine.js Plugins
+
+- `@alpinejs/intersect` - Intersection Observer integration
+- `@alpinejs/collapse` - Collapse/expand animations
+- `@alpinejs/focus` - Focus management utilities
+
+### Internal Modules
+
+- `debugLog` - Debug logging utility
+- `loadScript` - Dynamic script loader
+- `dataDOM` - Alpine.data component for DOM utilities
+
+## Implementation
+
+### Alpine.js Setup
+
+The main.js file exposes Alpine globally and registers plugins before initialization:
+
+```javascript
+import Alpine from "alpinejs";
+import intersect from "@alpinejs/intersect";
+import collapse from "@alpinejs/collapse";
+import focus from "@alpinejs/focus";
+
+// Make Alpine available globally
+window.Alpine = Alpine;
+
+// Register plugins
+Alpine.plugin(intersect);
+Alpine.plugin(collapse);
+Alpine.plugin(focus);
+
+// Register Alpine.data components
+Alpine.data("xDOM", dataDOM);
+```
+
+### DOM Ready Helper
+
+The file includes a `domReady()` helper function that executes callbacks when the document is ready:
+
+```javascript
+function domReady(callback) {
+  if (['interactive', 'complete'].indexOf(document.readyState) >= 0) {
+    callback();
+  } else {
+    document.addEventListener('DOMContentLoaded', callback);
+  }
+}
+```
+
+### Conditional Script Loading
+
+For Safari browsers, the balance-text library is loaded dynamically:
+
+```javascript
+if (navigator.userAgent.indexOf('Safari') != -1 && 
+    navigator.userAgent.indexOf('Chrome') == -1) {
+  loadScript('//cdn.jsdelivr.net/npm/balance-text@3.3.1/balancetext.min.js', 
+    'async', 
+    () => {
+      balanceText(document.querySelectorAll('[x-balance-text]'), {watch: true});
+    }
+  );
+}
+```
+
+### Initialization Sequence
+
+When the DOM is ready, the following initialization occurs:
+
+```javascript
+domReady(() => {
+  // Theme branding in console
+  console.log('🍹 Fresh Juice');
+  
+  // Start Alpine.js
+  Alpine.start();
+  
+  // Enable page prefetching
+  flyingPages({
+    // Prefetch all pages by default
+  });
+});
+```
+
+## Console Branding
+
+The main.js file outputs styled console messages displaying the FreshJuice branding:
+
+- Cocktail emoji (🍹) in large format
+- "Fresh Juice" title with custom styling
+- Theme description
+- GitHub repository link
+
+## Usage
+
+This file is automatically loaded as part of the theme's build process. No manual initialization is required.
+
+## Plugin Registration Order
+
+<Warning>
+Alpine.js plugins and components must be registered **before** calling `Alpine.start()`. The order in main.js is:
+
+1. Import Alpine and plugins
+2. Assign `window.Alpine`
+3. Register plugins with `Alpine.plugin()`
+4. Register data components with `Alpine.data()`
+5. Call `Alpine.start()`
+</Warning>
+
+## Related
+
+- [debugLog](/api/js/debug-log) - Debug logging utility
+- [loadScript](/api/js/load-script) - Dynamic script loader
+- [Alpine.data (xDOM)](/api/js/alpine-data) - DOM utility component

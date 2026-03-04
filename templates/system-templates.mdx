@@ -1,0 +1,567 @@
+---
+title: System Templates
+description: Documentation for error pages, search results, and membership templates in FreshJuice
+---
+
+System templates handle essential website functionality including error pages, search results, and membership features. These templates provide user-facing interfaces for system-level operations.
+
+## Template Location
+
+All system templates are located in:
+
+```
+source/theme/templates/system/
+```
+
+## Error Pages
+
+### 404 Not Found
+
+**File:** `templates/system/404.html`
+
+**Purpose:** Displayed when a page cannot be found.
+
+#### Template Annotations
+
+```html
+<!--
+  templateType: error_page
+  isAvailableForNewContent: true
+  label: FreshJuice - 404 Not Found
+  screenshotPath: ../../images/template-previews/404.png
+-->
+```
+
+#### Structure
+
+```hubl
+{% extends "../layouts/base.html" %}
+{# pageTitle is used on system templates for setting a value for the title tag #}
+{% set pageTitle = "404 Not Found" %}
+
+{% block body %}
+<section class="min-h-screenSinNav grid items-center error-page" data-error="404">
+  <div class="container grid gap-8 md:grid-cols-2 items-center">
+    <div class="prose sm:prose-lg md:prose-xl [&_img]:rounded-md">
+      {% module_block module "content" path="@hubspot/rich_text", no_wrapper=True %}
+        {% module_attribute "html" %}
+          <p><small><b>{{ pageTitle }}</b></small></p>
+          <h1>
+            Ahhhhhhh!<br/>
+            <small>This page does not exist</small>
+          </h1>
+          <p>
+            <em>
+              Don't get angry with me<br/>
+              I never caused you no pain...
+            </em>
+          </p>
+          <p>
+            You can go back to <a href="/">homepage</a>.<br/>
+            Or sit here and listen to some music.
+          </p>
+        {% end_module_attribute %}
+      {% end_module_block %}
+    </div>
+    {% module "light-youtube"
+      path="../../modules/lite-youtube",
+      label="YouTube",
+      no_wrapper=True %}
+  </div>
+</section>
+{% endblock body %}
+```
+
+#### Features
+
+- **Full-height Layout** - Uses viewport height minus navigation
+- **Two-Column Design** - Content and embedded media
+- **Friendly Messaging** - Humorous, helpful error message
+- **YouTube Embed** - lite-youtube module for entertainment
+- **Homepage Link** - Easy navigation back to main site
+
+<Note>
+The 404 page uses a playful approach with song lyrics and a YouTube video to make the error experience less frustrating for users.
+</Note>
+
+---
+
+### 403 Forbidden
+
+**File:** `templates/system/403.html`
+
+**Purpose:** Displayed when access to a page is forbidden.
+
+#### Structure
+
+Similar to the 404 template but with messaging specific to access restrictions:
+
+```hubl
+{% set pageTitle = "403 Forbidden" %}
+```
+
+---
+
+### 500 Internal Server Error
+
+**File:** `templates/system/500.html`
+
+**Purpose:** Displayed when a server error occurs.
+
+#### Structure
+
+```hubl
+{% set pageTitle = "500 Internal Server Error" %}
+```
+
+Provides information about server errors and guidance for users.
+
+---
+
+## Search Templates
+
+### Search Results
+
+**File:** `templates/system/search-results.html`
+
+**Purpose:** Displays search results for site search queries.
+
+#### Template Annotations
+
+```html
+<!--
+  templateType: search_results_page
+  isAvailableForNewContent: true
+  label: FreshJuice - search results
+  screenshotPath: ../../images/template-previews/search-results.png
+-->
+```
+
+#### Structure
+
+```hubl
+{% extends "../layouts/base.html" %}
+{# pageTitle is used on system templates for setting a value for the title tag #}
+{% set pageTitle = "Search results" %}
+
+{% if request.query_dict.term %}
+  {% set search_query = request.query_dict.term %}
+{% elif request.query_dict.q %}
+  {# v3 search api support #}
+  {% set search_query = request.query_dict.q %}
+{% endif %}
+
+{% block body %}
+
+<header class="article__header bg-gradient-60 from-orange-100 via-red-100 to-amber-100 min-h-56 md:min-h-96 flex justify-center items-center">
+  <div class="container w-full text-center prose sm:prose-lg md:prose-xl text-balance">
+    <h1>Search results for &ldquo;{{ search_query | escape }}&rdquo;</h1>
+  </div>
+</header>
+
+<section class="min-h-96">
+  <div class="container">
+    {% module "search_results"
+      path="../../modules/search-results",
+      title={
+        "show_title": "false"
+      }
+    %}
+  </div>
+</section>
+
+{% endblock body %}
+```
+
+#### Features
+
+- **Query Detection** - Supports both `term` and `q` parameters
+- **Gradient Header** - Consistent with blog post design
+- **Search Query Display** - Shows what the user searched for
+- **Escaped Output** - Prevents XSS attacks
+- **Search Results Module** - Custom search results display
+- **Minimum Height** - Ensures proper layout for few results
+
+#### Query Parameters
+
+```hubl
+request.query_dict.term  {# Legacy search parameter #}
+request.query_dict.q     {# v3 search API parameter #}
+```
+
+---
+
+## Membership Templates
+
+Membership templates provide authentication and user management functionality for gated content.
+
+### Membership Login
+
+**File:** `templates/system/membership-login.html`
+
+**Purpose:** Login page for accessing member-only content.
+
+#### Template Annotations
+
+```html
+<!--
+  templateType: membership_login_page
+  isAvailableForNewContent: true
+  label: FreshJuice - membership login
+  screenshotPath: ../../images/template-previews/membership-login.png
+-->
+```
+
+#### Structure
+
+```hubl
+{% extends "../layouts/base.html" %}
+{% set pageTitle = "Membership | Login" %}
+
+{% block header %}
+  {% global_partial path="../partials/header-no-navigation.html" %}
+{% endblock %}
+
+{% block body %}
+<section class="min-h-screenSinNav systems-page">
+  <div class="container">
+    <div class="mx-auto prose sm:prose-lg md:prose-xl [&_img]:rounded-md">
+      {% module "content"
+        path="@hubspot/rich_text",
+        html="<h1>Sign in to view this page</h1><p>This page is only available to people who have been given access.</p>"
+      %}
+      <div class="form-container not-prose"
+           x-init="
+             document.querySelectorAll('.hs-login-widget-show-password').forEach(el => {
+               el.addEventListener('click', (event) => {
+                 event.preventDefault();
+                 let input = el.nextElementSibling;
+                 el.innerHTML = input.type === 'password' ? 'Hide password' : 'Show password';
+                 input.type = input.type === 'password' ? 'text' : 'password';
+               });
+             });
+           ">
+        {% member_login "my_login"
+          email_label= "Email",
+          password_label= "Password",
+          remember_me_label= "Remember Me",
+          reset_password_text= "Forgot your password?",
+          submit_button_text= "Login"
+        %}
+      </div>
+      <div>
+        {% module_block module "membership_admin_content"
+          label="Contact admin",
+          path="@hubspot/rich_text"
+        %}
+          {% module_attribute "html" %}
+            <p>Having trouble? <a href="{{ "mailto:" ~ site_settings.membershipWebsiteAdmin }}">Contact the admin</a>.</p>
+          {% end_module_attribute %}
+        {% end_module_block %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block footer %}
+  {% global_partial path="../partials/footer-for-lp.html" %}
+{% endblock footer %}
+```
+
+#### Features
+
+- **Simplified Header** - No navigation to reduce distractions
+- **Simplified Footer** - Minimal footer for landing page
+- **Login Widget** - HubSpot native login functionality
+- **Password Toggle** - Alpine.js powered show/hide password
+- **Reset Password Link** - Built-in password recovery
+- **Admin Contact** - Link to contact site admin
+- **Full Height** - Uses viewport height
+
+#### HubL Member Login Tag
+
+```hubl
+{% member_login "identifier"
+  email_label="Email",
+  password_label="Password",
+  remember_me_label="Remember Me",
+  reset_password_text="Forgot your password?",
+  submit_button_text="Login"
+%}
+```
+
+---
+
+### Membership Register
+
+**File:** `templates/system/membership-register.html`
+
+**Purpose:** Registration page for new members.
+
+#### Template Annotations
+
+```html
+<!--
+  templateType: membership_register_page
+  isAvailableForNewContent: true
+  label: FreshJuice - membership register
+  screenshotPath: ../../images/template-previews/membership-register.png
+-->
+```
+
+#### Features
+
+- Registration form for new members
+- Email verification
+- Password requirements
+- Terms and conditions acceptance
+
+---
+
+### Membership Logout
+
+**File:** `templates/system/membership-logout.html`
+
+**Purpose:** Logout confirmation page.
+
+#### Features
+
+- Logout confirmation message
+- Redirect options
+- Simple, clean design
+
+---
+
+### Reset Password Request
+
+**File:** `templates/system/membership-reset-password-request.html`
+
+**Purpose:** Request password reset link.
+
+#### Features
+
+- Email input for password reset
+- Sends reset link to user's email
+- Confirmation messaging
+
+---
+
+### Reset Password
+
+**File:** `templates/system/membership-reset-password.html`
+
+**Purpose:** Set new password after reset request.
+
+#### Features
+
+- New password input
+- Password confirmation
+- Password strength requirements
+- Success/error messaging
+
+---
+
+## Subscription Templates
+
+### Subscription Preferences
+
+**File:** `templates/system/subscription-preferences.html`
+
+**Purpose:** Manage email subscription preferences.
+
+#### Template Annotations
+
+```html
+<!--
+  templateType: subscription_preferences
+  isAvailableForNewContent: true
+  label: FreshJuice - subscription preferences
+-->
+```
+
+#### Features
+
+- Email subscription management
+- Subscription type toggles
+- Update preferences
+- Unsubscribe options
+
+---
+
+### Subscriptions Confirmation
+
+**File:** `templates/system/subscriptions-confirmation.html`
+
+**Purpose:** Confirmation page after updating subscription preferences.
+
+---
+
+### Backup Unsubscribe
+
+**File:** `templates/system/backup-unsubscribe.html`
+
+**Purpose:** Fallback unsubscribe page.
+
+---
+
+## Password Protection
+
+### Password Prompt
+
+**File:** `templates/system/password-prompt.html`
+
+**Purpose:** Password entry for password-protected pages.
+
+#### Template Annotations
+
+```html
+<!--
+  templateType: password_prompt_page
+  isAvailableForNewContent: true
+  label: FreshJuice - password prompt
+-->
+```
+
+#### Features
+
+- Password input form
+- Access validation
+- Error messaging for incorrect passwords
+
+---
+
+## Common System Template Patterns
+
+### Setting Page Title
+
+System templates use the `pageTitle` variable:
+
+```hubl
+{% set pageTitle = "404 Not Found" %}
+```
+
+This is used in the base layout's `<title>` tag:
+
+```hubl
+<title>{{ page_meta.html_title or pageTitle }}</title>
+```
+
+### Simplified Navigation
+
+Many system templates use simplified headers/footers:
+
+```hubl
+{% block header %}
+  {% global_partial path="../partials/header-no-navigation.html" %}
+{% endblock %}
+
+{% block footer %}
+  {% global_partial path="../partials/footer-for-lp.html" %}
+{% endblock footer %}
+```
+
+### Full-Height Sections
+
+System pages often use full viewport height:
+
+```html
+<section class="min-h-screenSinNav">
+  <!-- Content -->
+</section>
+```
+
+**Custom utility:**
+- `min-h-screenSinNav` - Minimum height of viewport minus navigation
+
+### Form Styling
+
+System forms use the `not-prose` class to prevent typography styles:
+
+```html
+<div class="form-container not-prose">
+  {% member_login %}
+</div>
+```
+
+### Alpine.js Enhancements
+
+Some system templates include Alpine.js for interactivity:
+
+```html
+<div x-init="
+  // Password toggle functionality
+  document.querySelectorAll('.hs-login-widget-show-password').forEach(el => {
+    el.addEventListener('click', (event) => {
+      event.preventDefault();
+      let input = el.nextElementSibling;
+      el.innerHTML = input.type === 'password' ? 'Hide password' : 'Show password';
+      input.type = input.type === 'password' ? 'text' : 'password';
+    });
+  });
+">
+```
+
+## Template Type Reference
+
+| Template Type | File | Purpose |
+|--------------|------|----------|
+| `error_page` | 403.html, 404.html, 500.html | Error handling |
+| `search_results_page` | search-results.html | Site search |
+| `membership_login_page` | membership-login.html | Member login |
+| `membership_register_page` | membership-register.html | New member registration |
+| `membership_logout_page` | membership-logout.html | Logout confirmation |
+| `membership_reset_password_request_page` | membership-reset-password-request.html | Request password reset |
+| `membership_reset_password_page` | membership-reset-password.html | Set new password |
+| `subscription_preferences` | subscription-preferences.html | Email preferences |
+| `subscriptions_confirmation` | subscriptions-confirmation.html | Preference confirmation |
+| `backup_unsubscribe` | backup-unsubscribe.html | Unsubscribe fallback |
+| `password_prompt_page` | password-prompt.html | Password-protected pages |
+
+## Best Practices
+
+### Error Pages
+
+- Provide helpful, friendly messaging
+- Include navigation options (home, search, etc.)
+- Consider adding entertainment or humor
+- Maintain consistent branding
+
+### Membership Pages
+
+- Use simplified navigation to reduce distractions
+- Provide clear instructions
+- Include admin contact information
+- Implement proper security (HTTPS, password requirements)
+- Add password visibility toggles
+
+### Search Pages
+
+- Display the search query clearly
+- Escape user input to prevent XSS
+- Support multiple query parameter formats
+- Provide helpful no-results messaging
+
+### Subscription Pages
+
+- Make unsubscribe easy to find
+- Explain subscription types clearly
+- Confirm preference changes
+- Provide re-subscribe options
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Page Templates" icon="file" href="/templates/page-templates">
+    Learn about standard page templates
+  </Card>
+  <Card title="Blog Templates" icon="blog" href="/templates/blog-templates">
+    Explore blog listing and post templates
+  </Card>
+  <Card title="Forms" icon="input-text" href="/guides/theme-fields">
+    Understand form modules and styling
+  </Card>
+  <Card title="Membership Setup" icon="users" href="/templates/system-templates">
+    Configure membership functionality
+  </Card>
+</CardGroup>

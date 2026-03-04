@@ -1,0 +1,388 @@
+---
+title: Theme Architecture
+description: Understanding how modules, templates, macros, and sections work together in FreshJuice DEV
+---
+
+FreshJuice DEV follows HubSpot's CMS architecture with a clean, modular approach that promotes reusability and maintainability.
+
+## Architecture Overview
+
+The theme is built on four main building blocks:
+
+<CardGroup cols={2}>
+  <Card title="Templates" icon="file-code">
+    Define page structure and layout using HubL
+  </Card>
+  <Card title="Modules" icon="cube">
+    Reusable content components with fields
+  </Card>
+  <Card title="Macros" icon="function">
+    Utility functions for common operations
+  </Card>
+  <Card title="Sections" icon="table-layout">
+    Drag-and-drop layout components
+  </Card>
+</CardGroup>
+
+## Templates
+
+Templates define the overall page structure and use HubL (HubSpot Markup Language) to create dynamic pages.
+
+### Template Types
+
+<Tabs>
+  <Tab title="Layouts">
+    Base templates that define the common HTML structure:
+    
+    ```html templates/layouts/base.html
+    <!doctype html>
+    <html lang="{{ html_lang }}" x-data="xDOM" hs-cms-theme="FreshJuice">
+      <head>
+        <meta charset="utf-8">
+        <title>{{ page_meta.html_title or pageTitle }}</title>
+        {{ require_css(get_asset_url("../../css/main.css")) }}
+        {{ standard_header_includes }}
+      </head>
+      <body>
+        <div class="body-wrapper {{ builtin_body_classes }}">
+          {% block header %}
+            {% global_partial path="../partials/header.html" %}
+          {% endblock header %}
+          
+          <main id="main-content" class="body-container-wrapper">
+            {% block body %}
+            {% endblock body %}
+          </main>
+          
+          {% block footer %}
+            {% global_partial path="../partials/footer.html" %}
+          {% endblock footer %}
+        </div>
+        {{ require_js(get_asset_url("../../js/main.js"), { position: "footer", defer: true }) }}
+        {{ standard_footer_includes }}
+      </body>
+    </html>
+    ```
+  </Tab>
+  
+  <Tab title="Partials">
+    Reusable template fragments:
+    - `header.html` - Site header and navigation
+    - `footer.html` - Site footer
+    - `header-no-navigation.html` - Simplified header
+    - `footer-for-lp.html` - Landing page footer
+  </Tab>
+  
+  <Tab title="System">
+    HubSpot system pages:
+    - `404.html` - Page not found
+    - `500.html` - Server error
+    - `search-results.html` - Search results page
+    - `membership-login.html` - Member login
+    - `password-prompt.html` - Password protection
+  </Tab>
+</Tabs>
+
+<Info>
+  Templates use HubL blocks (`{% block %}`) to create inheritance hierarchies and allow child templates to override specific sections.
+</Info>
+
+## Modules
+
+Modules are self-contained components that editors can add to pages. Each module consists of multiple files:
+
+### Module Structure
+
+Every module lives in its own `.module` directory:
+
+```plaintext
+button.module/
+├── fields.json          # Field definitions for the module editor
+├── meta.json            # Module metadata and settings
+├── module.css           # Module-specific styles (optional)
+├── module.html          # Module template markup
+└── module.js            # Module-specific JavaScript (optional)
+```
+
+### Module Example
+
+<CodeGroup>
+```html module.html
+<div class="not-prose container flex justify-center items-center">
+  {% set href = module.cta_link.url.type == "EMAIL_ADDRESS" ? "mailto:" ~ module.cta_link.url.href : module.cta_link.url.href %}
+  <a class="button rounded-md"
+     href="{{ module.cta_link.url.type == "CALL_TO_ACTION" ? href : href|escape_url }}"
+    {% if module.cta_link.open_in_new_tab %} target="_blank" {% endif %}
+    {% if module.cta_link.rel %} rel="{{ module.cta_link.rel|escape_attr }}" {% endif %}>
+    {{ module.button_text }}
+  </a>
+</div>
+```
+
+```json meta.json
+{
+  "global": false,
+  "content_types": [
+    "LANDING_PAGE",
+    "SITE_PAGE",
+    "BLOG_LISTING",
+    "BLOG_POST"
+  ],
+  "categories": ["forms_and_buttons"],
+  "icon": "../../images/module-icons/cta.svg",
+  "host_template_types": ["PAGE"],
+  "label": "Button",
+  "is_available_for_new_content": true
+}
+```
+</CodeGroup>
+
+### Available Modules
+
+FreshJuice DEV includes 30+ modules organized by category:
+
+<AccordionGroup>
+  <Accordion title="Content & Media">
+    - **card** - Content card with image and text
+    - **flip-cards** - Interactive flip card component
+    - **list** - Customizable list component
+    - **lite-youtube** - Optimized YouTube embed
+    - **lite-vimeo** - Optimized Vimeo embed
+    - **codepen** - CodePen embed
+    - **github-gist** - GitHub Gist embed
+  </Accordion>
+  
+  <Accordion title="Navigation & Layout">
+    - **navigation-bar** - Full-featured navigation
+    - **navigation-bar-simple** - Simplified navigation
+    - **menu** - Menu component
+    - **logo** - Logo display module
+    - **divider** - Section divider
+  </Accordion>
+  
+  <Accordion title="Forms & Buttons">
+    - **button** - Call-to-action button
+  </Accordion>
+  
+  <Accordion title="Blog Components">
+    - **blog-listing** - Blog post listing
+    - **blog-listing-hero** - Hero blog listing
+    - **blog-pagination** - Pagination controls
+    - **related-posts** - Related posts widget
+  </Accordion>
+  
+  <Accordion title="Interactive Components">
+    - **accordion** - Collapsible content sections
+    - **tabs** - Tabbed content interface
+    - **google-maps** - Google Maps embed
+  </Accordion>
+  
+  <Accordion title="Testimonials & Social">
+    - **testimonials-simple-centered** - Centered testimonial
+    - **testimonials-side-by-side** - Side-by-side layout
+    - **testimonials-with-large-avatar** - Avatar-focused design
+    - **testimonials-with-star-rating** - Rating display
+    - **social-icons** - Social media icons
+  </Accordion>
+  
+  <Accordion title="Pricing & Stats">
+    - **pricing-card** - Individual pricing card
+    - **pricing-cards** - Pricing comparison
+    - **price-card-with-details** - Detailed pricing
+    - **stats-simple** - Simple statistics
+    - **stats-simple-grid** - Grid statistics
+    - **stats-timeline** - Timeline statistics
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+  Modules can be marked as `global: true` in `meta.json` to make them available across all page types without manually adding them to each page.
+</Tip>
+
+## Macros
+
+Macros are reusable HubL functions that perform common operations. They're similar to functions in traditional programming.
+
+### Available Macros
+
+<CodeGroup>
+```html macros/slugify.html
+{# Returns the slug version of a string #}
+{# Usage: {% from 'macros/slugify.html' import slugify %} #}
+{# {{ slugify('Give me slug') }} #}
+
+{%- macro slugify(text) -%}
+  {%- set output = text %}
+  {%- set output = output | string | lower | safe | striptags -%}
+  {%- set output = output | regex_replace("[\t\n\f\r ]", "-") -%}
+  {%- set output = output | regex_replace("[^0-9A-Za-z_-]", "") -%}
+  {%- set output = output | regex_replace("-+", "-") -%}
+  {%- set output = output | regex_replace("^[-]", "") -%}
+  {%- set output = output | regex_replace("[-]$", "") -%}
+  {{- output -}}
+{%- endmacro -%}
+```
+
+```html macros/unique-id.html
+{# Generates a unique ID for HTML elements #}
+{# Usage: {% from 'macros/unique-id.html' import unique_id %} #}
+{# {{ unique_id() }} #}
+
+{%- macro unique_id() -%}
+  {{- 'id-' ~ range(0, 999999) | random ~ '-' ~ range(0, 999999) | random -}}
+{%- endmacro -%}
+```
+
+```html macros/minutes-to-read.html
+{# Calculates estimated reading time #}
+{# Usage: {% from 'macros/minutes-to-read.html' import minutes_to_read %} #}
+{# {{ minutes_to_read(content.post_body) }} #}
+
+{%- macro minutes_to_read(text, wpm=200) -%}
+  {%- set words = text | striptags | split(' ') | length -%}
+  {%- set minutes = (words / wpm) | round(0, 'ceil') -%}
+  {{- minutes -}}
+{%- endmacro -%}
+```
+</CodeGroup>
+
+### Using Macros
+
+Import and use macros in your templates or modules:
+
+```html
+{% from '../macros/slugify.html' import slugify %}
+{% from '../macros/unique-id.html' import unique_id %}
+
+<div id="{{ unique_id() }}">
+  <h2>{{ slugify(content.name) }}</h2>
+</div>
+```
+
+## Sections
+
+Sections are drag-and-drop layout components that use HubSpot's DnD (Drag and Drop) areas.
+
+### Section Example
+
+<CodeGroup>
+```html sections/hero-banner.html
+<!--
+  templateType: section
+  label: Hero banner
+  isAvailableForNewContent: true
+  screenshotPath: ../images/section-previews/hero-banner.png
+  description: "Full size background image section"
+-->
+{% dnd_section
+  background_color={{ context.background_color or "#f8fafc" }},
+  vertical_alignment="MIDDLE"
+%}
+  {% dnd_module
+    path="@hubspot/linked_image",
+    img={
+      "alt": context.image_alt or "Hero Image",
+      "src": context.image or "default-image.jpg"
+    },
+    offset=0,
+    width=6
+  %}
+  {% end_dnd_module %}
+  
+  {% dnd_column offset=6, width=6 %}
+    {% dnd_row %}
+      {% dnd_module
+        path="@hubspot/rich_text"
+        html={{ context.content or "<h1>Welcome</h1>" }}
+      %}
+      {% end_dnd_module %}
+    {% end_dnd_row %}
+  {% end_dnd_column %}
+{% end_dnd_section %}
+```
+</CodeGroup>
+
+### Available Sections
+
+- **hero-banner.html** - Hero section with image and content
+- **call-to-action.html** - CTA section
+- **cards.html** - Card grid layout
+- **multi-column-content.html** - Multi-column layouts
+- **row-content-img-left.html** - Content with left image
+- **row-content-img-right.html** - Content with right image
+- **pricing.html** - Pricing section
+
+<Note>
+  Sections provide pre-built layouts that content editors can customize without touching code. They're perfect for creating flexible page builders.
+</Note>
+
+## How They Work Together
+
+<Steps>
+  <Step title="Templates provide structure">
+    Base templates (`layouts/base.html`) define the overall HTML structure with header, main content area, and footer.
+  </Step>
+  
+  <Step title="Partials handle common elements">
+    Header and footer partials are included using `{% global_partial %}` to ensure consistency across pages.
+  </Step>
+  
+  <Step title="Sections create page layouts">
+    Drag-and-drop sections allow editors to build page layouts without coding.
+  </Step>
+  
+  <Step title="Modules add content components">
+    Individual modules can be added to sections or directly to pages for specific functionality.
+  </Step>
+  
+  <Step title="Macros provide utilities">
+    Macros are imported and used throughout templates and modules for common operations.
+  </Step>
+</Steps>
+
+## Best Practices
+
+<Warning>
+  Keep modules focused on a single purpose. If a module is becoming too complex, consider breaking it into multiple smaller modules.
+</Warning>
+
+<CardGroup cols={2}>
+  <Card title="Module Organization" icon="boxes-stacked">
+    - One component per module
+    - Clear, descriptive names
+    - Consistent field naming
+    - Include module icons for better UX
+  </Card>
+  
+  <Card title="Macro Guidelines" icon="code">
+    - Document parameters clearly
+    - Provide usage examples
+    - Keep macros pure (no side effects)
+    - Use descriptive variable names
+  </Card>
+  
+  <Card title="Template Structure" icon="sitemap">
+    - Use template inheritance
+    - Keep partials DRY
+    - Document block usage
+    - Consistent naming conventions
+  </Card>
+  
+  <Card title="Section Design" icon="table-cells-large">
+    - Mobile-first responsive design
+    - Provide context defaults
+    - Include preview screenshots
+    - Clear descriptions for editors
+  </Card>
+</CardGroup>
+
+## Related Resources
+
+<CardGroup cols={2}>
+  <Card title="Project Structure" icon="folder-tree" href="/concepts/project-structure">
+    Understand the directory organization
+  </Card>
+  <Card title="Build Process" icon="gears" href="/concepts/build-process">
+    Learn about the compilation pipeline
+  </Card>
+</CardGroup>

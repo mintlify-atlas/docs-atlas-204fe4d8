@@ -1,0 +1,131 @@
+---
+title: minutes_to_read
+description: Calculate and display estimated reading time for content
+---
+
+## Overview
+
+The `minutes_to_read` macro calculates the estimated reading time for content based on an average reading speed of 300 words per minute. It outputs the reading time wrapped in customizable HTML tags.
+
+## Syntax
+
+```hbs
+{{ minutes_to_read(my_content, before, after) }}
+```
+
+## Parameters
+
+<ParamField path="my_content" type="object" required>
+  A content object that contains a `post_body` property with the content to analyze
+</ParamField>
+
+<ParamField path="before" type="string" default="<span>">
+  HTML or text to display before the reading time number
+</ParamField>
+
+<ParamField path="after" type="string" default="</span>">
+  HTML or text to display after the reading time number
+</ParamField>
+
+## Return Value
+
+Returns a string containing the estimated reading time in minutes, wrapped in the specified `before` and `after` strings. If the reading time is less than 1 minute, returns an empty string.
+
+## Usage
+
+### Import the Macro
+
+```hbs
+{% from 'path/to/minutes-to-read.html' import minutes_to_read %}
+```
+
+### Basic Example
+
+```hbs
+{{ minutes_to_read(content) }}
+```
+
+**Output:** `<span>5</span>` (for content that takes approximately 5 minutes to read)
+
+### Custom Wrapper Tags
+
+```hbs
+{{ minutes_to_read(content, '<span class="read-time">', ' min read</span>') }}
+```
+
+**Output:** `<span class="read-time">5 min read</span>`
+
+### Plain Text Output
+
+```hbs
+{{ minutes_to_read(content, '', ' minutes') }}
+```
+
+**Output:** `5 minutes`
+
+### Common Use Cases
+
+```hbs
+{# Blog post meta information #}
+<div class="post-meta">
+  <span class="author">{{ content.blog_post_author }}</span>
+  {{ minutes_to_read(content, '<span class="read-time">', ' min read</span>') }}
+</div>
+
+{# Article card #}
+<article>
+  <h2>{{ content.name }}</h2>
+  <p class="meta">
+    {{ content.publish_date_localized }} &middot;
+    {{ minutes_to_read(content, '', ' min read') }}
+  </p>
+</article>
+
+{# Conditional display #}
+{% set read_time = minutes_to_read(content, '', '') %}
+{% if read_time %}
+  <div class="reading-time">
+    Estimated reading time: {{ read_time }} minutes
+  </div>
+{% endif %}
+```
+
+## Calculation Method
+
+The macro calculates reading time using the following formula:
+
+1. Strips HTML tags from `post_body` and counts words
+2. Rounds word count down to nearest 100 (e.g., 847 words → 800 words)
+3. Divides by 300 (average words per minute)
+4. Rounds to 2 decimal places, then rounds to nearest whole number
+5. If result is less than 1, returns nothing; otherwise returns the formatted time
+
+**Example calculation:**
+- Content has 1,250 words
+- Rounded to 1,200 words
+- 1,200 ÷ 300 = 4.00
+- Rounded: 4 minutes
+
+## Implementation Details
+
+```hbs
+{%- set initialPostWords = my_content.post_body | striptags | wordcount -%}
+{%- set calculatedPostWords = (initialPostWords/100) * 100 -%}
+{%- set finishedPostWords = calculatedPostWords | divide(300) | round(2) -%}
+{%- set number = finishedPostWords | round -%}
+{%- if number < 1 -%}
+{%- else -%}
+{{ before }}{{ number }}{{ after }}
+{%- endif -%}
+```
+
+<Note>
+The macro assumes an average reading speed of 300 words per minute. Very short content (less than 1 minute to read) will not display any output.
+</Note>
+
+## Best Practices
+
+- Use this macro with blog posts or long-form content objects
+- Ensure the content object has a `post_body` property
+- For very short content, consider using conditional logic to display alternative text
+- Customize the `before` and `after` parameters to match your design system

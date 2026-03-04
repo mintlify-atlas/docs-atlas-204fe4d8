@@ -1,0 +1,649 @@
+---
+title: Blog Templates
+description: Documentation for blog listing and blog post templates in FreshJuice
+---
+
+FreshJuice includes dedicated templates for blog functionality, including blog listing pages and blog post layouts. These templates leverage HubSpot's blog system and provide modern, responsive designs.
+
+## Available Blog Templates
+
+### Blog Index Template
+
+**File:** `templates/blog-index.html`
+
+**Purpose:** Standard blog listing page that displays blog posts in a grid or list format.
+
+#### Template Annotations
+
+```html
+<!--
+  templateType: blog_listing
+  isAvailableForNewContent: true
+  label: Blog listing
+  screenshotPath: ../images/template-previews/blog-index.png
+-->
+```
+
+#### Structure
+
+```hubl
+{% extends "./layouts/base.html" %}
+
+{% block body %}
+
+  {% module "blog-listing-hero"
+    path="../modules/blog-listing-hero",
+    label="Blog Listing Hero",
+    no_wrapper=True
+  %}
+
+  <section>
+    <div class="container">
+      {% module "blog-listing"
+        path="../modules/blog-listing",
+        title="Blog Listing",
+        no_wrapper=True
+      %}
+      {% if contents.total_page_count > 1 and not simple_list_page %}
+        <div id="pagination" class="mt-10 md:mt-20">
+          {% module "blog-pagination"
+            path="../modules/blog-pagination",
+            title="Blog Pagination",
+            no_wrapper=True
+          %}
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+{% endblock body %}
+```
+
+#### Features
+
+- **Blog Listing Hero** - Header section for the blog
+- **Blog Listing Module** - Displays posts in a customizable layout
+- **Pagination** - Automatically shows pagination when there are multiple pages
+- **Conditional Display** - Pagination only appears when needed
+
+#### HubSpot Variables
+
+- `contents` - Blog post data provided by HubSpot
+- `contents.total_page_count` - Total number of pages
+- `simple_list_page` - Boolean indicating if this is a simple list page
+
+---
+
+### Blog Index Modular Template
+
+**File:** `templates/blog-index-modular.html`
+
+**Purpose:** Drag-and-drop enabled blog listing page for maximum flexibility.
+
+#### Template Annotations
+
+```html
+<!--
+  templateType: blog_listing
+  isAvailableForNewContent: true
+  label: Blog listing - Modular
+  screenshotPath: ../images/template-previews/blog-index.png
+-->
+```
+
+#### Structure
+
+```hubl
+{% extends "./layouts/base.html" %}
+
+{% block body %}
+
+  {% module "blog-listing-hero"
+    path="../modules/blog-listing-hero",
+    label="Blog Listing Hero",
+    no_wrapper=True
+  %}
+
+  {% dnd_area "dnd_area"
+    label="Main section",
+    class="",
+    padding={
+      "default": {
+        "top": 80,
+        "right": 20,
+        "bottom": 80,
+        "left": 20
+      },
+      "mobile": {
+        "top": 80,
+        "right": 20,
+        "bottom": 80,
+        "left": 20
+      }
+    }
+  %}
+
+    {% dnd_section background_color="#FF0000" %}
+      {% dnd_column %}
+
+        {% dnd_row %}
+          {% dnd_module
+            path="../modules/blog-listing",
+            title="Blog Listing"
+          %}
+          {% end_dnd_module %}
+        {% end_dnd_row %}
+
+        {% dnd_row %}
+          {% dnd_module
+            path="../modules/blog-pagination",
+            title="Blog Pagination"
+          %}
+          {% end_dnd_module %}
+        {% end_dnd_row %}
+
+      {% end_dnd_column %}
+    {% end_dnd_section %}
+
+  {% end_dnd_area %}
+
+{% endblock body %}
+```
+
+#### Features
+
+- **Drag-and-Drop Editor** - Full DnD area for content customization
+- **Flexible Layout** - Content editors can add/remove sections
+- **Configurable Padding** - Responsive padding settings
+- **Modular Design** - Blog modules wrapped in DnD rows
+
+<Note>
+The modular template gives content editors more control over layout and allows them to add additional content sections around the blog listing.
+</Note>
+
+---
+
+### Blog Post Template (Modern)
+
+**File:** `templates/blog-post.html`
+
+**Purpose:** Modern, full-width blog post layout with gradient header.
+
+#### Template Annotations
+
+```html
+<!--
+  templateType: blog_post
+  isAvailableForNewContent: true
+  label: Blog Post - Modern
+  screenshotPath: ../images/template-previews/blog-post.png
+-->
+```
+
+#### Structure
+
+```hubl
+{% extends "./layouts/base.html" %}
+
+{% block body %}
+<article class="">
+
+  {# Header with gradient background #}
+  <header class="article__header bg-gradient-60 from-orange-100 via-red-100 to-amber-100 min-h-56 md:min-h-96 flex justify-center items-center">
+    <div class="container w-full text-center prose sm:prose-lg md:prose-xl text-balance">
+      <h1 x-balance-text>{{ content.name | striptags }}</h1>
+      <div class="article__header__meta md:text-lg">
+        Posted
+        {% if content.blog_post_author %}
+        by
+        <a href="{{ blog_author_url(group.id, content.blog_post_author.slug) }}"
+           class="text-current"
+           rel="author">{{ content.blog_post_author.display_name }}</a>
+        {% endif %}
+        on
+        <time datetime="{{ content.publish_date }}" class="">{{ content.publish_date_localized }}</time>
+      </div>
+    </div>
+  </header>
+
+  {# Article body #}
+  <div class="container article__body">
+    <div class="mx-auto prose sm:prose-lg md:prose-xl [&_img]:rounded-md [&>span]:block">
+
+      {# Back to blog navigation #}
+      <nav class="min-h-9 leading-none" x-html='`
+        <a class="inline-flex items-center gap-2 group no-underline" href="{{ group.absolute_url }}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="size-5 group-hover:-translate-x-2 transition-transform" width="48" height="48"><path d="M228,128a12,12,0,0,1-12,12H69l51.52,51.51a12,12,0,0,1-17,17l-72-72a12,12,0,0,1,0-17l72-72a12,12,0,0,1,17,17L69,116H216A12,12,0,0,1,228,128Z"></path></svg>
+          <span>Back to Blog</span>
+        </a>
+      `'>
+      </nav>
+
+      {# Post content #}
+      {{ content.post_body }}
+
+      {# Tags #}
+      {% if content.tag_list %}
+        <ul class="article__tags list-none flex flex-wrap gap-2 p-0!">
+          {% for tag in content.tag_list %}
+            <li class="m-0! p-0! italic">
+              <a class="no-underline hover:underline"
+                 href="{{ blog_tag_url(group.id, tag.slug) }}"
+                 rel="tag">#{{ tag.name }}</a>{% if not loop.last %},{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+    </div>
+  </div>
+
+  {# Article footer #}
+  <footer class="container article__footer !pt-0">
+    <div class="mx-auto prose sm:prose-lg md:prose-xl">
+
+      {# Post author #}
+      {% if content.blog_post_author %}
+      <hr>
+
+      {% module "global-post-author"
+        path="../modules/global-post-author",
+        label="Post Author",
+        no_wrapper=True
+      %}
+      {% endif %}
+
+      <hr>
+
+      {# Share buttons #}
+      {% module "global-share-buttons"
+        path="../modules/global-share-buttons",
+        label="Share Buttons",
+        no_wrapper=True
+      %}
+
+      {# Previous/next post navigation #}
+      {% if content.previous_post_name or content.next_post_name %}
+        <hr>
+
+        <div class="flex flex-wrap gap-y-6 gap-x-10 justify-between items-center mt-8">
+          {% if content.previous_post_name %}
+          <div class="mr-auto ml-0">
+            <a href="/{{ content.previous_post_slug }}"
+               class="flex items-center gap-2 no-underline group leading-tight">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="size-5 group-hover:-translate-x-2 transition-transform" width="48" height="48"><path d="M228,128a12,12,0,0,1-12,12H69l51.52,51.51a12,12,0,0,1-17,17l-72-72a12,12,0,0,1,0-17l72-72a12,12,0,0,1,17,17L69,116H216A12,12,0,0,1,228,128Z"></path></svg>
+              <span>{{ content.previous_post_name }}</span>
+            </a>
+          </div>
+          {% endif %}
+          {% if content.next_post_name %}
+          <div class="text-right ml-auto mr-0">
+            <a href="/{{ content.next_post_slug }}"
+               class="flex items-center gap-2 no-underline group leading-tight">
+              <span>{{ content.next_post_name }}</span>
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="size-5 group-hover:translate-x-2 transition-transform" width="48" height="48"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"></path></svg>
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+    </div>
+  </footer>
+
+</article>
+
+{# Comments section #}
+{% if group.allow_comments %}
+<section class="blog-comments bg-gradient-10 from-amber-100 via-rose-50 to-orange-100">
+  <div class="container">
+    <div class="mx-auto prose sm:prose-lg md:prose-xl [&_form]:bg-transparent">
+      <h3>Comments</h3>
+      <div class="blog-comments__form">
+        {% module "blog_comments"
+          path="@hubspot/blog_comments",
+          label="Blog comments",
+          no_wrapper=True
+        %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# Related posts #}
+<section class="bg-rose-50">
+  <div class="container">
+    <div class="mx-auto prose sm:prose-lg md:prose-xl text-center mb-8 md:mb-12">
+      <h2>Related Posts</h2>
+    </div>
+    {% module "related-posts"
+      path="../modules/related-posts",
+      label="Related Posts",
+      layout="row",
+      no_wrapper=True
+    %}
+  </div>
+</section>
+
+{# Scroll to top button #}
+{% module "scroll-to-top"
+  path="../modules/global-scroll-to-top",
+  label="global-scroll-to-top",
+  no_wrapper=True
+%}
+
+{% endblock body %}
+```
+
+#### Features
+
+- **Gradient Header** - Eye-catching gradient background
+- **Centered Title** - Large, balanced heading
+- **Author Info** - Author name and publish date
+- **Back to Blog** - Navigation link with hover animation
+- **Post Body** - Full article content with Tailwind Typography
+- **Tags** - Tag list with links to tag archives
+- **Post Author Module** - Author bio and avatar
+- **Share Buttons** - Social sharing functionality
+- **Post Navigation** - Previous/next post links
+- **Comments** - Conditional comments section
+- **Related Posts** - Related content in row layout
+- **Scroll to Top** - Button for long posts
+
+#### HubSpot Blog Variables
+
+```hubl
+{{ content.name }}              {# Post title #}
+{{ content.post_body }}         {# Post content #}
+{{ content.publish_date }}      {# ISO format date #}
+{{ content.publish_date_localized }} {# Localized date #}
+{{ content.blog_post_author }}  {# Author object #}
+{{ content.tag_list }}          {# Array of tags #}
+{{ content.previous_post_name }} {# Previous post title #}
+{{ content.previous_post_slug }} {# Previous post URL #}
+{{ content.next_post_name }}    {# Next post title #}
+{{ content.next_post_slug }}    {# Next post URL #}
+{{ group.id }}                  {# Blog ID #}
+{{ group.absolute_url }}        {# Blog URL #}
+{{ group.allow_comments }}      {# Comments enabled? #}
+```
+
+---
+
+### Blog Post Sidebar Template (Classic)
+
+**File:** `templates/blog-post-sidebar.html`
+
+**Purpose:** Classic blog post layout with sidebar for related posts.
+
+#### Template Annotations
+
+```html
+<!--
+  templateType: blog_post
+  isAvailableForNewContent: true
+  label: Blog Post - Classic with Sidebar
+  screenshotPath: ../images/template-previews/blog-post.png
+-->
+```
+
+#### Structure
+
+```hubl
+{% extends "./layouts/base.html" %}
+
+{% block body %}
+
+{# Gradient header #}
+<header class="article__header bg-gradient-60 from-orange-100 via-red-100 to-amber-100 min-h-56 md:min-h-96 flex justify-center items-center">
+  <div class="container w-full text-center prose sm:prose-lg md:prose-xl text-balance">
+    <h1 x-balance-text>{{ content.name | striptags }}</h1>
+  </div>
+</header>
+
+{# Two column layout: content + sidebar #}
+<div class="container grid lg:grid-cols-3 gap-8 lg:gap-12">
+  
+  {# Main content (2/3 width) #}
+  <div class="lg:col-span-2">
+    <article class="">
+      <div class="article__body">
+        <div class="mx-auto prose sm:prose-lg md:prose-xl [&_img]:rounded-md [&>span]:block">
+
+          {# Post meta #}
+          <div class="article__header__meta md:text-lg mb-8">
+            <div class="mb-2">
+              Posted
+              {% if content.blog_post_author %}
+              by
+              <a href="{{ blog_author_url(group.id, content.blog_post_author.slug) }}"
+                 class="text-current"
+                 rel="author">{{ content.blog_post_author.display_name }}</a>
+              {% endif %}
+              on
+              <time datetime="{{ content.publish_date }}" class="">{{ content.publish_date_localized }}</time>
+            </div>
+            <hr class="m-0!">
+          </div>
+
+          {# Post content #}
+          {{ content.post_body }}
+
+          {# Tags #}
+          {% if content.tag_list %}
+            <ul class="article__tags list-none flex flex-wrap gap-2 p-0!">
+              {% for tag in content.tag_list %}
+                <li class="m-0! p-0! italic">
+                  <a class="no-underline hover:underline"
+                     href="{{ blog_tag_url(group.id, tag.slug) }}"
+                     rel="tag">#{{ tag.name }}</a>{% if not loop.last %},{% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+
+      {# Footer content #}
+      <footer class="article__footer pt-8">
+        <div class="mx-auto prose sm:prose-lg md:prose-xl">
+
+          {# Author bio #}
+          {% if content.blog_post_author %}
+            <hr>
+            {% module "global-post-author"
+              path="/FreshJuice/modules/global-post-author",
+              label="Post Author",
+              no_wrapper=True
+            %}
+          {% endif %}
+
+          <hr>
+
+          {# Share buttons #}
+          {% module "global-share-buttons"
+            path="../modules/global-share-buttons",
+            label="Share Buttons",
+            no_wrapper=True
+          %}
+
+          {# Previous/next navigation #}
+          {% if content.previous_post_name or content.next_post_name %}
+            <hr>
+            <div class="flex flex-wrap gap-y-6 gap-x-10 justify-between items-center mt-8">
+              {# Navigation links #}
+            </div>
+          {% endif %}
+
+          <hr>
+        </div>
+      </footer>
+    </article>
+
+    {# Comments #}
+    {% if group.allow_comments %}
+      <div class="blog-comments mt-12">
+        <div class="mx-auto prose sm:prose-lg md:prose-xl [&_form]:bg-transparent">
+          <h3>Comments</h3>
+          <div class="blog-comments__form">
+            {% module "blog_comments"
+              path="@hubspot/blog_comments",
+              label="Blog comments",
+              no_wrapper=True
+            %}
+          </div>
+          <hr class="lg:hidden">
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  {# Sidebar (1/3 width) #}
+  <aside class="">
+    <div class="mx-auto prose sm:prose-lg md:prose-xl mb-8 lg:mb-12">
+      <h2 class="md:leading-none">Related Posts</h2>
+      {% module "related-posts"
+        path="../modules/related-posts",
+        label="Related Posts",
+        layout="col",
+        no_wrapper=True
+      %}
+    </div>
+  </aside>
+
+</div>
+
+{# Scroll to top button #}
+{% module "scroll-to-top"
+  path="../modules/global-scroll-to-top",
+  label="global-scroll-to-top",
+  no_wrapper=True
+%}
+
+{% endblock body %}
+```
+
+#### Features
+
+- **Two-Column Layout** - Main content (2/3) + sidebar (1/3)
+- **Responsive Grid** - Stacks on mobile, side-by-side on desktop
+- **Sidebar Related Posts** - Related posts in column layout
+- **Classic Design** - Traditional blog post layout
+- **All Standard Features** - Author, tags, share, comments, navigation
+
+#### Layout Comparison
+
+| Feature | Modern Template | Sidebar Template |
+|---------|----------------|------------------|
+| Layout | Full-width | Two-column |
+| Related Posts | Full-width section | Sidebar |
+| Header Style | Gradient with meta | Gradient, title only |
+| Meta Position | In header | Below title |
+| Best For | Long-form content, featured posts | News, updates, shorter posts |
+
+## Common Blog Features
+
+### Author Information
+
+Both templates include author bio sections:
+
+```hubl
+{% if content.blog_post_author %}
+  {% module "global-post-author"
+    path="../modules/global-post-author",
+    label="Post Author",
+    no_wrapper=True
+  %}
+{% endif %}
+```
+
+### Social Sharing
+
+Share buttons for social media:
+
+```hubl
+{% module "global-share-buttons"
+  path="../modules/global-share-buttons",
+  label="Share Buttons",
+  no_wrapper=True
+%}
+```
+
+### Tag Navigation
+
+Tags with links to tag archive pages:
+
+```hubl
+{% if content.tag_list %}
+  <ul class="article__tags list-none flex flex-wrap gap-2 p-0!">
+    {% for tag in content.tag_list %}
+      <li class="m-0! p-0! italic">
+        <a href="{{ blog_tag_url(group.id, tag.slug) }}"
+           rel="tag">#{{ tag.name }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+```
+
+### Comments
+
+Conditional comments section:
+
+```hubl
+{% if group.allow_comments %}
+  {% module "blog_comments"
+    path="@hubspot/blog_comments",
+    label="Blog comments",
+    no_wrapper=True
+  %}
+{% endif %}
+```
+
+### Post Navigation
+
+Previous and next post links:
+
+```hubl
+{% if content.previous_post_name or content.next_post_name %}
+  {# Navigation UI #}
+{% endif %}
+```
+
+## Typography Classes
+
+FreshJuice uses Tailwind Typography for blog content:
+
+```html
+<div class="prose sm:prose-lg md:prose-xl">
+  {{ content.post_body }}
+</div>
+```
+
+**Responsive sizes:**
+- Base: `prose` (default)
+- Small screens: `sm:prose-lg`
+- Medium+ screens: `md:prose-xl`
+
+**Custom modifications:**
+- `[&_img]:rounded-md` - Rounded images
+- `[&>span]:block` - Block-level spans
+- `[&_form]:bg-transparent` - Transparent form backgrounds
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Page Templates" icon="file" href="/templates/page-templates">
+    Learn about page templates for standard content
+  </Card>
+  <Card title="System Templates" icon="gear" href="/templates/system-templates">
+    Explore error pages and system templates
+  </Card>
+  <Card title="Blog Modules" icon="puzzle-piece" href="/modules/blog-modules">
+    Understand blog-specific modules
+  </Card>
+  <Card title="Styling" icon="palette" href="/guides/styling-components">
+    Learn about styling and Tailwind CSS
+  </Card>
+</CardGroup>

@@ -1,0 +1,92 @@
+---
+title: unique_id
+description: Generate a unique identifier string
+---
+
+## Overview
+
+The `unique_id` macro generates a pseudo-unique identifier by combining five random integers separated by underscores. This is useful for creating unique HTML IDs, cache keys, or other identifiers that need to be distinct.
+
+## Syntax
+
+```hbs
+{{ unique_id() }}
+```
+
+## Parameters
+
+This macro takes no parameters.
+
+## Return Value
+
+Returns a string containing five 6-digit random integers joined by underscores.
+
+**Example output:** `123456_789012_345678_901234_567890`
+
+## Usage
+
+### Import the Macro
+
+```hbs
+{% from 'path/to/unique-id.html' import unique_id %}
+```
+
+<Note>
+This macro depends on the `random_int` macro, so ensure both are available in your template.
+</Note>
+
+### Basic Example
+
+```hbs
+{{ unique_id() }}
+```
+
+**Output:** `483921_726450_158392_604827_391845` (values will vary)
+
+### Common Use Cases
+
+```hbs
+{# Generate unique HTML IDs #}
+<div id="accordion-{{ unique_id() }}">
+  <!-- content -->
+</div>
+
+{# Create unique cache keys #}
+{% set cache_key = 'data_' ~ unique_id() %}
+
+{# Generate unique form field names #}
+<input type="hidden" name="token_{{ unique_id() }}" value="...">
+
+{# Create unique JavaScript variable names #}
+<script>
+  var instance_{{ unique_id() }} = new Widget();
+</script>
+```
+
+### Ensuring Uniqueness in Loops
+
+```hbs
+{% for item in items %}
+  {% set item_id = unique_id() %}
+  <button data-target="#modal-{{ item_id }}">
+    Open {{ item.name }}
+  </button>
+  <div id="modal-{{ item_id }}" class="modal">
+    {{ item.content }}
+  </div>
+{% endfor %}
+```
+
+## Implementation Details
+
+The macro:
+1. Calls `random_int()` five times to generate five random 6-digit numbers
+2. Joins them with underscores using the `join` filter
+
+<Warning>
+While this macro generates pseudo-unique identifiers suitable for UI purposes, it should not be used for cryptographic purposes or situations requiring guaranteed uniqueness. The randomness is based on HubL's random filter.
+</Warning>
+
+## Related Macros
+
+- [random_int](/api/macros/random-int) - Generates a single random integer (used internally by this macro)

@@ -1,0 +1,183 @@
+---
+title: Local Development Setup
+description: Set up your local development environment for the FreshJuice DEV HubSpot theme
+---
+
+The FreshJuice DEV theme uses a modern development workflow with npm scripts, file watching, and automatic compilation.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- Node.js (v16 or higher)
+- npm (v7 or higher)
+- HubSpot CLI installed and configured
+- A HubSpot account with CMS Hub access
+
+## Installation
+
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/freshjuice-dev/freshjuice-dev-hubspot-theme.git
+cd freshjuice-dev-hubspot-theme
+npm install
+```
+
+## Development Workflow
+
+### Start Development Mode
+
+Run all watch tasks in parallel:
+
+```bash
+npm start
+```
+
+This command runs three watchers simultaneously:
+- **Tailwind CSS** - Watches and compiles CSS changes
+- **JavaScript** - Bundles JavaScript with esbuild
+- **HubSpot** - Uploads changes to HubSpot CMS
+
+### Individual Watch Commands
+
+You can also run watchers individually:
+
+```bash
+# Watch Tailwind CSS only
+npm run watch:tailwind
+
+# Watch JavaScript only
+npm run watch:js
+
+# Watch HubSpot files only
+npm run watch:hubspot
+```
+
+## NPM Scripts
+
+The theme includes several useful npm scripts:
+
+### Build Commands
+
+```bash
+# Build everything (clean, compile JS, compile CSS, create zip)
+npm run build
+
+# Build Tailwind CSS
+npm run build:tailwind
+
+# Build JavaScript bundle
+npm run build:js
+
+# Create distribution zip file
+npm run build:zip
+```
+
+### HubSpot Commands
+
+```bash
+# Fetch theme from HubSpot
+npm run fetch:hubspot
+
+# Upload theme to HubSpot
+npm run upload:hubspot
+
+# Watch and sync changes to HubSpot
+npm run watch:hubspot
+```
+
+### Version Management
+
+```bash
+# Bump patch version (1.0.0 -> 1.0.1)
+npm run version:patch
+
+# Bump minor version (1.0.0 -> 1.1.0)
+npm run version:minor
+
+# Bump major version (1.0.0 -> 2.0.0)
+npm run version:major
+```
+
+### Maintenance
+
+```bash
+# Clean temporary and distribution directories
+npm run clean
+```
+
+## File Structure
+
+The development workflow follows this structure:
+
+```
+.
+├── source/              # Source files (edit these)
+│   ├── css/
+│   │   └── tailwind.css # Tailwind entry point
+│   └── js/
+│       └── main.js      # JavaScript entry point
+├── theme/               # Compiled theme (synced to HubSpot)
+│   ├── css/
+│   │   └── tailwind.css # Compiled CSS
+│   ├── js/
+│   │   └── main.js      # Bundled JavaScript
+│   ├── templates/       # HubL templates
+│   └── modules/         # HubL modules
+└── package.json         # npm configuration
+```
+
+## Development Tips
+
+### Hot Reload
+
+When running `npm start`, changes are automatically:
+1. Compiled/bundled locally
+2. Uploaded to HubSpot CMS
+3. Reflected in your preview environment
+
+### Working with CSS
+
+Edit files in `source/css/` - they will be compiled to `theme/css/tailwind.css`:
+
+- Base styles: `source/css/base/`
+- Components: `source/css/components/`
+- Utilities: `source/css/utilities/`
+
+### Working with JavaScript
+
+Edit `source/js/main.js` or create new modules in `source/js/modules/`. The bundler will automatically include dependencies.
+
+### Linting and Formatting
+
+The project uses Husky for Git hooks to ensure code quality before commits.
+
+## Troubleshooting
+
+### Watch Commands Not Working
+
+If file watching stops working:
+1. Stop all processes (Ctrl+C)
+2. Run `npm run clean`
+3. Restart with `npm start`
+
+### HubSpot Upload Issues
+
+If uploads fail:
+1. Check your HubSpot CLI configuration: `hs auth`
+2. Verify the destination path in `package.json`
+3. Ensure you have proper permissions in HubSpot
+
+### Build Errors
+
+For build errors:
+1. Delete `node_modules` and run `npm install`
+2. Check for syntax errors in source files
+3. Review error messages in the terminal
+
+## Next Steps
+
+- [Configure Tailwind CSS](/development/tailwind-css)
+- [Work with Alpine.js](/development/alpine-js)
+- [Learn HubL templating](/development/hubl-templates)

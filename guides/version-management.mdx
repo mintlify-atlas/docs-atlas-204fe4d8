@@ -1,0 +1,356 @@
+---
+title: Version Management
+description: Learn how to manage FreshJuice DEV theme versions using automated scripts that sync package.json and theme.json.
+---
+
+FreshJuice DEV uses semantic versioning with automated scripts to keep version numbers synchronized across `package.json` and `theme.json`. This guide explains the version management system.
+
+## Semantic Versioning
+
+FreshJuice DEV follows [SemVer](https://semver.org/) (Semantic Versioning) with the format:
+
+```
+MAJOR.MINOR.PATCH
+```
+
+- **MAJOR**: Breaking changes or major feature releases
+- **MINOR**: New features, backward-compatible
+- **PATCH**: Bug fixes and minor updates
+
+## Version Bump Scripts
+
+FreshJuice DEV includes automated version management scripts that:
+
+1. Bump version in `package.json`
+2. Sync version to `theme/theme.json`
+3. Maintain consistency across the project
+
+### Available Commands
+
+```bash
+# Bump patch version (3.0.0 → 3.0.1)
+npm run version:patch
+
+# Bump minor version (3.0.0 → 3.1.0)
+npm run version:minor
+
+# Bump major version (3.0.0 → 4.0.0)
+npm run version:major
+```
+
+## Bumping Versions
+
+<Steps>
+  <Step title="Choose the appropriate version bump">
+    Decide which version component to increment:
+    
+    **Patch (3.0.0 → 3.0.1):**
+    - Bug fixes
+    - Minor style tweaks
+    - Documentation updates
+    
+    **Minor (3.0.0 → 3.1.0):**
+    - New features
+    - New modules or templates
+    - Backward-compatible enhancements
+    
+    **Major (3.0.0 → 4.0.0):**
+    - Breaking changes
+    - Major redesign
+    - Incompatible API changes
+  </Step>
+  
+  <Step title="Run the version bump command">
+    Execute the appropriate script:
+    
+    ```bash
+    npm run version:patch
+    ```
+    
+    This runs `./scripts/bump-theme-version.sh patch`
+  </Step>
+  
+  <Step title="Verify the version update">
+    The script will output:
+    ```
+    Bumping version...
+    Bumping version with "patch" mode. Please wait...
+    Current version: 3.0.0
+    New version: 3.0.1
+    Version bumped successfully!
+    ```
+  </Step>
+  
+  <Step title="Commit the changes">
+    The script modifies two files:
+    - `package.json`
+    - `theme/theme.json`
+    
+    Commit these changes:
+    ```bash
+    git add package.json theme/theme.json
+    git commit -m "Bump version to 3.0.1"
+    ```
+  </Step>
+</Steps>
+
+## How the Version Script Works
+
+The `bump-theme-version.sh` script automates the version bump process:
+
+### Script Breakdown
+
+<Steps>
+  <Step title="Prerequisites check">
+    The script requires `jq` (JSON processor):
+    
+    ```bash
+    if ! [ -x "$(command -v jq)" ]; then
+      echo "Error: jq is not installed." >&2
+      exit 1
+    fi
+    ```
+    
+    Install jq if needed:
+    ```bash
+    # macOS
+    brew install jq
+    
+    # Ubuntu/Debian
+    sudo apt-get install jq
+    
+    # Windows (via Chocolatey)
+    choco install jq
+    ```
+  </Step>
+  
+  <Step title="Validate bump mode">
+    Accepts only valid modes:
+    
+    ```bash
+    mode=${1:-patch}
+    
+    if [ "$mode" != "major" ] && [ "$mode" != "minor" ] && [ "$mode" != "patch" ]; then
+      echo "Invalid mode. Please use major, minor or patch."
+      exit 1
+    fi
+    ```
+  </Step>
+  
+  <Step title="Bump package.json version">
+    Uses npm's built-in version command:
+    
+    ```bash
+    CURRENT_VERSION=$(node -p "require('./package.json').version")
+    npm version "$mode" --no-git-tag-version
+    NEW_VERSION=$(node -p "require('./package.json').version")
+    ```
+    
+    The `--no-git-tag-version` flag prevents automatic git tagging.
+  </Step>
+  
+  <Step title="Sync to theme.json">
+    Updates the theme configuration:
+    
+    ```bash
+    jq ".version = \"$NEW_VERSION\"" theme/theme.json > theme/theme.json.tmp
+    mv theme/theme.json.tmp theme/theme.json
+    ```
+    
+    This ensures HubSpot recognizes the new version.
+  </Step>
+</Steps>
+
+## Version Management Workflow
+
+### Complete Release Process
+
+<Steps>
+  <Step title="Make your changes">
+    Develop features, fix bugs, or update documentation.
+  </Step>
+  
+  <Step title="Bump the version">
+    Update version numbers:
+    
+    ```bash
+    npm run version:minor
+    ```
+  </Step>
+  
+  <Step title="Build the theme">
+    Create production build:
+    
+    ```bash
+    npm run build
+    ```
+    
+    This creates a ZIP file with the new version number:
+    ```
+    ./_dist/freshjuice-dev-hubspot-theme-v3.1.0-dev.zip
+    ```
+  </Step>
+  
+  <Step title="Commit version changes">
+    Commit the version bump:
+    
+    ```bash
+    git add package.json theme/theme.json
+    git commit -m "Bump version to 3.1.0"
+    ```
+  </Step>
+  
+  <Step title="Create a git tag">
+    Tag the release:
+    
+    ```bash
+    git tag v3.1.0
+    git push origin main --tags
+    ```
+  </Step>
+  
+  <Step title="Upload to HubSpot">
+    Deploy the new version:
+    
+    ```bash
+    npm run upload:hubspot
+    ```
+  </Step>
+</Steps>
+
+## Version Consistency
+
+### Files Managed by Scripts
+
+The version management system keeps these files synchronized:
+
+1. **package.json**:
+   ```json
+   {
+     "name": "freshjuice-dev-hubspot-theme",
+     "version": "3.0.0",
+     ...
+   }
+   ```
+
+2. **theme/theme.json**:
+   ```json
+   {
+     "label": "FreshJuice DEV",
+     "version": "3.0.0",
+     ...
+   }
+   ```
+
+3. **Distribution ZIP filename**:
+   ```
+   freshjuice-dev-hubspot-theme-v3.0.0-dev.zip
+   ```
+
+### Manual Version Updates
+
+<Warning>
+Avoid manually editing version numbers in `package.json` or `theme.json`. Always use the version bump scripts to ensure synchronization.
+</Warning>
+
+If you must manually update versions:
+
+1. Update `package.json`
+2. Update `theme/theme.json`
+3. Verify both files have the same version number
+4. Run `npm run build` to verify the ZIP filename is correct
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="When to bump versions">
+    - Bump before building for release
+    - Never bump during active development
+    - Bump after merging feature branches
+    - Create a git tag after version bumps
+  </Accordion>
+  
+  <Accordion title="Version bump guidelines">
+    - **Patch**: Small fixes, no new features
+    - **Minor**: New features, maintains compatibility
+    - **Major**: Breaking changes, major updates
+    - Follow conventional commits for clarity
+  </Accordion>
+  
+  <Accordion title="Git workflow integration">
+    ```bash
+    # Feature development
+    git checkout -b feature/new-module
+    # ... make changes ...
+    git commit -m "Add new hero module"
+    
+    # Merge to main
+    git checkout main
+    git merge feature/new-module
+    
+    # Bump version and release
+    npm run version:minor
+    npm run build
+    git add package.json theme/theme.json
+    git commit -m "Bump version to 3.1.0"
+    git tag v3.1.0
+    git push origin main --tags
+    ```
+  </Accordion>
+  
+  <Accordion title="Hotfix workflow">
+    For urgent bug fixes:
+    
+    ```bash
+    # Create hotfix branch
+    git checkout -b hotfix/critical-bug
+    
+    # Fix the bug
+    git commit -m "Fix critical navigation bug"
+    
+    # Bump patch version
+    npm run version:patch
+    
+    # Build and deploy immediately
+    npm run build
+    npm run upload:hubspot
+    
+    # Merge back to main
+    git checkout main
+    git merge hotfix/critical-bug
+    git push origin main --tags
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+**Script fails with "jq is not installed":**
+- Install jq using your package manager (see script breakdown above)
+- Verify installation: `jq --version`
+
+**Version numbers out of sync:**
+- Run the version script again to resynchronize
+- Check both `package.json` and `theme/theme.json`
+- Manually fix if necessary, then run `npm run build`
+
+**Git conflicts on version bump:**
+- Resolve conflicts in `package.json` and `theme/theme.json`
+- Run version script again after resolving
+- Ensure only one version bump happens per release
+
+**ZIP file has wrong version:**
+- Verify `package.json` version is correct
+- Run `npm run build` again to regenerate ZIP
+- Check `./_dist/` directory for the updated file
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Building the Theme" icon="hammer" href="/guides/building-theme">
+    Build production-ready packages with version numbers
+  </Card>
+  <Card title="HubSpot CLI Guide" icon="cloud-arrow-up" href="/guides/hubspot-cli">
+    Deploy versioned themes to HubSpot
+  </Card>
+</CardGroup>

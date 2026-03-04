@@ -1,0 +1,408 @@
+---
+title: Styling Components
+description: Learn how to style FreshJuice DEV components using Tailwind CSS
+icon: 'paintbrush'
+---
+
+FreshJuice DEV is built with Tailwind CSS v4, providing a powerful utility-first CSS framework for rapid development.
+
+## Tailwind CSS v4
+
+FreshJuice DEV uses the latest Tailwind CSS v4, which includes significant improvements:
+
+- Zero-config setup with automatic file scanning
+- Native CSS variables and custom properties
+- Enhanced performance and smaller bundle sizes
+- New design tokens system
+
+## CSS Architecture
+
+The theme's CSS is organized into multiple layers:
+
+```
+source/css/
+├── tailwind.css          # Main Tailwind configuration
+├── base/                 # Base layer styles
+│   ├── reset.css        # CSS reset
+│   ├── typography.css   # Typography defaults
+│   ├── forms.css        # Form styling
+│   ├── buttons.css      # Button styles
+│   └── animations.css   # Animation utilities
+├── components/          # Component-specific styles
+│   ├── blog-comments.css
+│   ├── system.css
+│   └── yt-lite.css
+└── utilities/           # Custom utilities
+    └── utils.css
+```
+
+## Tailwind Configuration
+
+The main configuration is in `source/css/tailwind.css`:
+
+```css source/css/tailwind.css
+@import "tailwindcss" source(none);
+
+@source "../../theme/**/*.html";
+@source "../../theme/**/*.js";
+@source "../js/farmerswife.js";
+@source "./**/*.css";
+
+@theme {
+  --color-cursor: #FFFFFF;
+  --color-cursor-500: #FFFFFF;
+  --color-terminal: #000000;
+  --color-terminal-500: #000000;
+
+  --font-cursive: "Caveat", cursive;
+
+  /* Aspect ratios */
+  --aspect-auto: auto;
+  --aspect-box: 1;
+  --aspect-landscape: 4 / 3;
+  --aspect-portrait: 3 / 4;
+  --aspect-video: 16 / 9;
+  --aspect-widescreen: 16 / 9;
+  --aspect-ultrawide: 18 / 5;
+  --aspect-golden: 1.6180 / 1;
+  --aspect-macbook: 16 / 10;
+
+  --spacing-screenSinNav: calc(100vh - 5rem);
+}
+```
+
+## Using Tailwind Classes
+
+<Steps>
+  <Step title="Layout and spacing">
+    Use Tailwind's layout utilities for structure:
+
+    ```html
+    <div class="container mx-auto px-4 py-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Content -->
+      </div>
+    </div>
+    ```
+
+    **Common layout classes:**
+    - `container` - Centers content with max-width
+    - `mx-auto` - Centers horizontally
+    - `px-4`, `py-8` - Padding (x-axis, y-axis)
+    - `grid`, `flex` - Layout systems
+    - `gap-6` - Grid/flex gap spacing
+  </Step>
+
+  <Step title="Typography">
+    Apply text styles with utility classes:
+
+    ```html
+    <h1 class="text-4xl font-bold tracking-tight">
+      Heading
+    </h1>
+    <p class="text-lg text-gray-600 leading-relaxed">
+      Body text
+    </p>
+    ```
+
+    **Typography utilities:**
+    - `text-{size}` - Font size (sm, base, lg, xl, 2xl, etc.)
+    - `font-{weight}` - Weight (light, normal, medium, semibold, bold)
+    - `tracking-{spacing}` - Letter spacing
+    - `leading-{height}` - Line height
+  </Step>
+
+  <Step title="Colors">
+    Use the theme's color palette:
+
+    ```html
+    <div class="bg-cursor text-terminal">
+      Light theme
+    </div>
+    <div class="bg-terminal text-cursor">
+      Dark theme
+    </div>
+    ```
+
+    **Custom colors:**
+    - `cursor` - White (#FFFFFF)
+    - `terminal` - Black (#000000)
+    
+    Plus all Tailwind default colors (gray, red, blue, etc.)
+  </Step>
+
+  <Step title="Responsive design">
+    Apply breakpoint-specific classes:
+
+    ```html
+    <div class="text-sm md:text-base lg:text-lg xl:text-xl">
+      Responsive text
+    </div>
+    ```
+
+    **Breakpoints:**
+    - `sm:` - 640px and up
+    - `md:` - 768px and up
+    - `lg:` - 1024px and up
+    - `xl:` - 1280px and up
+    - `2xl:` - 1536px and up
+  </Step>
+</Steps>
+
+## Custom Theme Variables
+
+FreshJuice DEV includes custom CSS variables you can use:
+
+### Custom Colors
+
+```html
+<div class="bg-cursor">
+  Uses --color-cursor (white)
+</div>
+<div class="bg-terminal">
+  Uses --color-terminal (black)
+</div>
+```
+
+### Custom Fonts
+
+```html
+<p class="font-cursive">
+  Uses Caveat cursive font
+</p>
+```
+
+### Aspect Ratios
+
+Use custom aspect ratio utilities:
+
+```html
+<div class="aspect-video">
+  16:9 aspect ratio
+</div>
+<div class="aspect-landscape">
+  4:3 aspect ratio
+</div>
+<div class="aspect-golden">
+  Golden ratio (1.618:1)
+</div>
+```
+
+## Prose Styling
+
+For rich text content, use Tailwind's typography plugin:
+
+```html
+<div class="prose max-w-full">
+  {{ module.rich_text_content }}
+</div>
+```
+
+**Prose modifiers:**
+- `prose-sm` - Smaller text
+- `prose-lg` - Larger text
+- `prose-xl` - Extra large text
+- `max-w-full` - Override max-width constraint
+
+To disable prose styling for specific elements:
+
+```html
+<div class="prose">
+  <p>This has prose styling</p>
+  <div class="not-prose">
+    <p>This does NOT have prose styling</p>
+  </div>
+</div>
+```
+
+## Component Examples
+
+### Card Component
+
+```html
+<div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+  <h3 class="text-xl font-semibold mb-2">Card Title</h3>
+  <p class="text-gray-600">Card content goes here</p>
+</div>
+```
+
+### Button Styles
+
+```html
+<!-- Primary button -->
+<button class="bg-terminal text-cursor px-6 py-3 rounded-md font-medium hover:bg-gray-800 transition-colors">
+  Primary Button
+</button>
+
+<!-- Secondary button -->
+<button class="bg-white text-terminal border border-gray-300 px-6 py-3 rounded-md font-medium hover:bg-gray-50 transition-colors">
+  Secondary Button
+</button>
+
+<!-- Outline button -->
+<button class="border-2 border-terminal text-terminal px-6 py-3 rounded-md font-medium hover:bg-terminal hover:text-cursor transition-colors">
+  Outline Button
+</button>
+```
+
+### Grid Layouts
+
+```html
+<!-- Responsive grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div>Item 1</div>
+  <div>Item 2</div>
+  <div>Item 3</div>
+</div>
+
+<!-- Auto-fit grid -->
+<div class="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
+  <div>Flexible item</div>
+  <div>Flexible item</div>
+</div>
+```
+
+### Form Elements
+
+Base form styles are in `source/css/base/forms.css`:
+
+```html
+<form class="space-y-4">
+  <div>
+    <label class="block text-sm font-medium mb-1" for="name">
+      Name
+    </label>
+    <input
+      type="text"
+      id="name"
+      class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-terminal focus:border-terminal"
+    />
+  </div>
+  
+  <div>
+    <label class="block text-sm font-medium mb-1" for="message">
+      Message
+    </label>
+    <textarea
+      id="message"
+      rows="4"
+      class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-terminal focus:border-terminal"
+    ></textarea>
+  </div>
+  
+  <button type="submit" class="bg-terminal text-cursor px-6 py-2 rounded-md font-medium">
+    Submit
+  </button>
+</form>
+```
+
+## Using Theme Fields
+
+Access global theme settings in your modules:
+
+```html
+<!-- Use theme colors -->
+<div style="background-color: {{ theme.global_colors.primary.color }}">
+  Primary color background
+</div>
+
+<!-- Use theme fonts -->
+<h1 style="font-family: {{ theme.global_fonts.secondary.font }}">
+  Heading with theme font
+</h1>
+
+<!-- Use theme spacing -->
+<section style="padding-top: {{ theme.spacing.vertical_spacing }}px">
+  Content with theme spacing
+</section>
+```
+
+<Note>
+Learn more about using theme fields in the [Theme Fields Guide](/guides/theme-fields).
+</Note>
+
+## Custom Utilities
+
+Add custom utilities in `source/css/utilities/utils.css`:
+
+```css
+/* Custom utility classes */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+```
+
+## Animations
+
+Custom animations are defined in `source/css/base/animations.css`:
+
+```html
+<div class="animate-fade-in">
+  Fades in on load
+</div>
+<div class="animate-slide-up">
+  Slides up on load
+</div>
+```
+
+## Dark Mode Support
+
+Implement dark mode with Tailwind's dark variant:
+
+```html
+<div class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+  Light and dark mode support
+</div>
+```
+
+## Performance Tips
+
+<CardGroup cols={2}>
+  <Card title="Purge Unused Styles" icon="broom">
+    Tailwind v4 automatically purges unused styles. Ensure all your templates are in the `@source` paths.
+  </Card>
+
+  <Card title="Avoid Custom CSS" icon="ban">
+    Use Tailwind utilities whenever possible. Custom CSS increases bundle size and maintenance complexity.
+  </Card>
+
+  <Card title="Use JIT Mode" icon="bolt">
+    Tailwind v4 uses JIT by default, generating styles on-demand for faster builds.
+  </Card>
+
+  <Card title="Optimize Images" icon="image">
+    Use responsive images with Tailwind's aspect ratio utilities for better performance.
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+1. **Mobile-First Design** - Apply base styles for mobile, then add responsive modifiers
+2. **Consistent Spacing** - Use the spacing scale (4, 8, 16, 24, 32, etc.)
+3. **Semantic Classes** - Group related utilities together for readability
+4. **Component Extraction** - For repeated patterns, consider creating reusable modules
+5. **Accessibility** - Include focus states and ARIA attributes
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Creating Modules" icon="puzzle-piece" href="/guides/creating-modules">
+    Learn how to create custom HubSpot modules
+  </Card>
+
+  <Card title="Adding JavaScript" icon="js" href="/guides/adding-javascript">
+    Add interactive functionality to your components
+  </Card>
+
+  <Card title="Theme Fields" icon="sliders" href="/guides/theme-fields">
+    Customize global theme settings
+  </Card>
+
+  <Card title="Tailwind Docs" icon="external-link" href="https://tailwindcss.com/docs">
+    Official Tailwind CSS documentation
+  </Card>
+</CardGroup>

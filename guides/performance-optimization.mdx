@@ -1,0 +1,403 @@
+---
+title: Performance Optimization
+description: Optimize your FreshJuice DEV site with Flying Pages, lazy loading, and best practices
+---
+
+# Performance Optimization
+
+FreshJuice DEV is built with performance in mind, featuring Flying Pages for instant navigation, optimized asset loading, and modern JavaScript practices.
+
+## Flying Pages Integration
+
+FreshJuice DEV includes [Flying Pages](https://github.com/gijo-varghese/flying-pages) for intelligent link prefetching, making navigation feel instant.
+
+### How It Works
+
+Flying Pages is automatically initialized in `source/js/main.js:53`:
+
+```javascript
+import flyingPages from "flying-pages-module";
+
+domReady(() => {
+  Alpine.start();
+  flyingPages({
+    // Prefetch all pages by default
+  });
+});
+```
+
+### What Gets Prefetched
+
+By default, Flying Pages intelligently prefetches:
+
+- Links visible in the viewport
+- Links on hover (with delay)
+- Links on touchstart (mobile)
+
+### Configuration Options
+
+Customize Flying Pages behavior in `source/js/main.js`:
+
+```javascript
+flyingPages({
+  delay: 0,              // Delay before prefetching (ms)
+  maxRPS: 3,             // Max requests per second
+  hoverDelay: 50,        // Hover delay before prefetch (ms)
+  ignoreKeywords: [],    // URL patterns to ignore
+});
+```
+
+#### Common Configurations
+
+**Aggressive prefetching:**
+```javascript
+flyingPages({
+  delay: 0,
+  maxRPS: 5,
+  hoverDelay: 25
+});
+```
+
+**Conservative prefetching:**
+```javascript
+flyingPages({
+  delay: 150,
+  maxRPS: 1,
+  hoverDelay: 100
+});
+```
+
+**Ignore external links:**
+```javascript
+flyingPages({
+  ignoreKeywords: ['external', 'logout', 'download']
+});
+```
+
+### Benefits
+
+- **Near-instant navigation**: Pages load almost instantly
+- **Improved Core Web Vitals**: Better FCP and LCP scores
+- **No breaking changes**: Works with existing links
+- **Smart prefetching**: Only prefetches what's needed
+
+## Image Optimization
+
+### Lazy Loading
+
+FreshJuice DEV implements lazy loading for optimal performance.
+
+#### In Sections
+
+Set `loading` attribute in section modules (`theme/sections/multi-column-content.html:21`):
+
+```html
+{% dnd_module
+  path="@hubspot/linked_image",
+  img={
+    "loading": "lazy",
+    "src": "image.jpg"
+  }
+%}
+{% end_dnd_module %}
+```
+
+#### Loading Strategies
+
+**Hero images (above-the-fold):**
+```html
+"loading": "disabled"  // Load immediately
+```
+
+**Below-the-fold images:**
+```html
+"loading": "lazy"  // Defer loading
+```
+
+### Responsive Images
+
+Use HubSpot's sizing options for responsive images:
+
+```html
+img={
+  "size_type": "auto_custom_max",
+  "max_width": 600,
+  "max_height": 600,
+  "src": "image.jpg"
+}
+```
+
+**Size types:**
+- `auto`: Automatic sizing
+- `auto_custom_max`: Max width/height with aspect ratio
+- `exact`: Fixed width/height
+
+### Image Best Practices
+
+1. **Use appropriate formats**: WebP when possible
+2. **Optimize before upload**: Compress images before uploading to HubSpot
+3. **Use CDN URLs**: HubSpot automatically serves from CDN
+4. **Set dimensions**: Always specify width and height to prevent layout shift
+
+## JavaScript Optimization
+
+### Module Bundling
+
+FreshJuice DEV uses esbuild for fast bundling (`package.json:14`):
+
+```json
+"build:js": "npx esbuild ./source/js/main.js --outfile=./theme/js/main.js --bundle"
+```
+
+### Tree Shaking
+
+Only import what you need:
+
+```javascript
+import Alpine from "alpinejs";
+import intersect from "@alpinejs/intersect";  // Only needed plugins
+import collapse from "@alpinejs/collapse";
+import focus from "@alpinejs/focus";
+```
+
+### Conditional Loading
+
+Load scripts only when needed (`source/js/main.js:36`):
+
+```javascript
+if (navigator.userAgent.indexOf('Safari') != -1 && 
+    navigator.userAgent.indexOf('Chrome') == -1) {
+  loadScript('//cdn.jsdelivr.net/npm/balance-text@3.3.1/balancetext.min.js', 'async', () => {
+    balanceText(document.querySelectorAll('[x-balance-text]'), {watch: true});
+  });
+}
+```
+
+### Alpine.js Optimization
+
+#### Use x-intersect for Lazy Initialization
+
+```html
+<div x-data="{ show: false }" x-intersect="show = true">
+  <template x-if="show">
+    <!-- Heavy component -->
+  </template>
+</div>
+```
+
+#### Use x-collapse for Smooth Transitions
+
+```html
+<div x-show="open" x-collapse>
+  <!-- Collapsible content -->
+</div>
+```
+
+#### Defer Non-Critical Alpine Components
+
+```html
+<div x-data="heavyComponent" x-init="$nextTick(() => init())">
+  <!-- Component content -->
+</div>
+```
+
+## CSS Optimization
+
+### Tailwind CSS Purging
+
+Tailwind automatically removes unused CSS in production builds.
+
+**Build command** (`package.json:12`):
+```bash
+npm run build:tailwind
+```
+
+This generates only the CSS classes you actually use.
+
+### Critical CSS
+
+For better FCP, inline critical CSS in your base template:
+
+```html
+<style>
+  /* Critical above-the-fold styles */
+  .hero { /* ... */ }
+</style>
+```
+
+### CSS Best Practices
+
+1. **Use Tailwind utilities**: Avoid custom CSS when possible
+2. **Minimize custom CSS**: Keep `module.css` files minimal
+3. **Use Alpine directives**: Replace CSS animations with Alpine when interactive
+
+## Build Optimization
+
+### Development Workflow
+
+Watch mode for rapid development (`package.json:19`):
+
+```bash
+npm start  # Runs all watch tasks in parallel
+```
+
+This runs:
+- `watch:tailwind`: Auto-rebuild CSS on changes
+- `watch:js`: Auto-bundle JS on changes
+- `watch:hubspot`: Auto-upload to HubSpot on changes
+
+### Production Build
+
+Optimized production build (`package.json:20`):
+
+```bash
+npm run build
+```
+
+This runs sequentially:
+1. Clean temp and dist folders
+2. Bundle and minify JavaScript
+3. Build and purge Tailwind CSS
+4. Create deployment ZIP
+
+## Performance Monitoring
+
+### Core Web Vitals
+
+Monitor these key metrics:
+
+- **LCP (Largest Contentful Paint)**: < 2.5s
+- **FID (First Input Delay)**: < 100ms
+- **CLS (Cumulative Layout Shift)**: < 0.1
+
+### Tools
+
+1. **Google PageSpeed Insights**: Overall performance score
+2. **Chrome DevTools**: Network and performance profiling
+3. **Lighthouse**: Automated auditing
+4. **WebPageTest**: Detailed waterfall analysis
+
+## Advanced Optimization Techniques
+
+### Preconnect to External Domains
+
+Add to your base template:
+
+```html
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://resources.freshjuice.dev">
+```
+
+### Resource Hints
+
+Preload critical assets:
+
+```html
+<link rel="preload" href="/css/tailwind.css" as="style">
+<link rel="preload" href="/js/main.js" as="script">
+```
+
+### Font Optimization
+
+Use font-display for web fonts:
+
+```css
+@font-face {
+  font-family: 'CustomFont';
+  src: url('font.woff2') format('woff2');
+  font-display: swap;
+}
+```
+
+### Service Worker (Advanced)
+
+For offline support and caching, consider implementing a service worker:
+
+```javascript
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
+```
+
+## Performance Checklist
+
+### Images
+- [ ] Lazy load below-the-fold images
+- [ ] Disable lazy loading for hero images
+- [ ] Use responsive sizing (auto_custom_max)
+- [ ] Compress images before upload
+- [ ] Specify width and height attributes
+
+### JavaScript
+- [ ] Bundle with esbuild
+- [ ] Tree-shake unused code
+- [ ] Load scripts asynchronously when possible
+- [ ] Use Alpine.js directives efficiently
+- [ ] Initialize Flying Pages
+
+### CSS
+- [ ] Build Tailwind with purge enabled
+- [ ] Minimize custom CSS
+- [ ] Inline critical CSS
+- [ ] Remove unused styles
+
+### General
+- [ ] Enable HubSpot CDN
+- [ ] Minimize HTTP requests
+- [ ] Use browser caching
+- [ ] Monitor Core Web Vitals
+- [ ] Test on real devices
+
+## Debugging Performance Issues
+
+### Chrome DevTools Performance Tab
+
+1. Open DevTools (F12)
+2. Go to Performance tab
+3. Click Record
+4. Interact with your page
+5. Stop recording
+6. Analyze the timeline
+
+### Network Waterfall
+
+1. Open DevTools Network tab
+2. Reload page
+3. Look for:
+   - Large resources
+   - Render-blocking resources
+   - Long request chains
+   - Slow server responses
+
+### Console Warnings
+
+Watch for performance warnings:
+
+```javascript
+console.time('Operation');
+// Your code
+console.timeEnd('Operation');
+```
+
+## Performance Budget
+
+Set performance budgets for your project:
+
+- **Total page size**: < 2MB
+- **JavaScript bundle**: < 200KB (gzipped)
+- **CSS bundle**: < 50KB (gzipped)
+- **Largest image**: < 300KB
+- **Time to Interactive**: < 3s
+
+## Next Steps
+
+- Explore [Alpine.js documentation](https://alpinejs.dev/)
+- Learn about [Custom Sections](/guides/custom-sections)
+- Review [Tailwind CSS optimization](https://tailwindcss.com/docs/optimizing-for-production)
+- Check [Flying Pages documentation](https://github.com/gijo-varghese/flying-pages)
+
+## Resources
+
+- Flying Pages: [GitHub Repository](https://github.com/gijo-varghese/flying-pages)
+- Web.dev: [Performance Best Practices](https://web.dev/performance/)
+- HubSpot: [CMS Performance Guide](https://developers.hubspot.com/docs/cms/guides/performance)

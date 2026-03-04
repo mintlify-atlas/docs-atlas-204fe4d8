@@ -1,0 +1,629 @@
+---
+title: Theme Fields
+description: Learn how to customize and use global theme fields in FreshJuice DEV
+icon: 'sliders'
+---
+
+Theme fields allow you to define global settings that can be customized through the HubSpot theme editor and used across all your templates and modules.
+
+## What Are Theme Fields?
+
+Theme fields are global configuration options defined in `theme/fields.json`. They provide a centralized way to manage:
+
+- Colors and branding
+- Typography settings
+- Spacing and layout
+- Form styles
+- Button styles
+- And more...
+
+These settings are accessible through the HubSpot theme editor's "Edit theme settings" panel.
+
+## Theme Fields Structure
+
+FreshJuice DEV's theme fields are organized into logical groups:
+
+```
+theme/fields.json
+├── Global colors
+│   ├── Primary
+│   ├── Secondary
+│   └── Tertiary
+├── Global fonts
+│   ├── Primary (body)
+│   └── Secondary (headings)
+├── Spacing
+│   ├── Vertical spacing
+│   └── Maximum content width
+├── Text
+│   ├── Headings (H1-H6)
+│   ├── Body
+│   └── Links
+├── Buttons
+├── Forms
+├── Tables
+└── Website header
+```
+
+## Global Colors
+
+Define your brand colors:
+
+```json theme/fields.json
+{
+  "label": "Global colors",
+  "name": "global_colors",
+  "type": "group",
+  "children": [
+    {
+      "label": "Primary",
+      "name": "primary",
+      "type": "color",
+      "default": {
+        "color": "#111827"
+      }
+    },
+    {
+      "label": "Secondary",
+      "name": "secondary",
+      "type": "color",
+      "default": {
+        "color": "#F8FAFC"
+      }
+    },
+    {
+      "label": "Tertiary",
+      "name": "tertiary",
+      "type": "color",
+      "default": {
+        "color": "#FFF2E5"
+      }
+    }
+  ]
+}
+```
+
+### Using Global Colors
+
+Access theme colors in your modules:
+
+```html
+<!-- Inline styles -->
+<div style="background-color: {{ theme.global_colors.primary.color }}">
+  Primary color background
+</div>
+
+<!-- Text color -->
+<p style="color: {{ theme.global_colors.secondary.color }}">
+  Secondary color text
+</p>
+```
+
+## Global Fonts
+
+Define typography settings:
+
+```json
+{
+  "label": "Global fonts",
+  "name": "global_fonts",
+  "type": "group",
+  "children": [
+    {
+      "label": "Primary",
+      "name": "primary",
+      "type": "font",
+      "default": {
+        "fallback": "sans-serif",
+        "font": "Lato",
+        "font_set": "GOOGLE"
+      }
+    },
+    {
+      "label": "Secondary",
+      "name": "secondary",
+      "type": "font",
+      "default": {
+        "fallback": "serif",
+        "font": "Merriweather",
+        "font_set": "GOOGLE"
+      }
+    }
+  ]
+}
+```
+
+### Using Global Fonts
+
+```html
+<!-- Apply font family -->
+<h1 style="font-family: {{ theme.global_fonts.secondary.font }}, {{ theme.global_fonts.secondary.fallback }}">
+  Heading with theme font
+</h1>
+
+<p style="font-family: {{ theme.global_fonts.primary.font }}, {{ theme.global_fonts.primary.fallback }}">
+  Body text with theme font
+</p>
+```
+
+## Spacing Settings
+
+Control global spacing:
+
+```json
+{
+  "label": "Spacing",
+  "name": "spacing",
+  "type": "group",
+  "children": [
+    {
+      "label": "Vertical spacing",
+      "name": "vertical_spacing",
+      "type": "number",
+      "display": "slider",
+      "max": 500,
+      "min": 0,
+      "suffix": "px",
+      "default": 80
+    },
+    {
+      "label": "Maximum content width",
+      "name": "maximum_content_width",
+      "type": "number",
+      "display": "slider",
+      "max": 2500,
+      "min": 900,
+      "suffix": "px",
+      "default": 1240
+    }
+  ]
+}
+```
+
+### Using Spacing
+
+```html
+<!-- Vertical spacing -->
+<section style="padding-top: {{ theme.spacing.vertical_spacing }}px; padding-bottom: {{ theme.spacing.vertical_spacing }}px">
+  Content with theme spacing
+</section>
+
+<!-- Maximum content width -->
+<div style="max-width: {{ theme.spacing.maximum_content_width }}px" class="mx-auto">
+  Constrained content
+</div>
+```
+
+## Heading Styles
+
+Customize heading typography:
+
+```json
+{
+  "label": "Heading one (H1)",
+  "name": "h1",
+  "type": "group",
+  "children": [
+    {
+      "label": "Font",
+      "name": "font",
+      "type": "font",
+      "default": {
+        "size": 50,
+        "size_unit": "px",
+        "variant": "700"
+      }
+    },
+    {
+      "label": "Transform",
+      "name": "transform",
+      "type": "choice",
+      "choices": [
+        ["none", "None"],
+        ["capitalize", "Capitalize"],
+        ["uppercase", "Uppercase"],
+        ["lowercase", "Lowercase"]
+      ],
+      "default": "none"
+    }
+  ]
+}
+```
+
+### Using Heading Styles
+
+```html
+<h1 style="
+  font-family: {{ theme.text.h1.font.font }};
+  font-size: {{ theme.text.h1.font.size }}{{ theme.text.h1.font.size_unit }};
+  font-weight: {{ theme.text.h1.font.variant }};
+  text-transform: {{ theme.text.h1.transform }};
+  color: {{ theme.text.h1.font.color }};
+">
+  Styled Heading
+</h1>
+```
+
+## Button Styles
+
+Customize button appearance:
+
+```json
+{
+  "label": "Buttons",
+  "name": "buttons",
+  "type": "group",
+  "children": [
+    {
+      "label": "Text",
+      "name": "text",
+      "type": "group",
+      "children": [
+        {
+          "label": "Font",
+          "name": "font",
+          "type": "font",
+          "default": {
+            "color": "#FFFFFF",
+            "size": 22,
+            "size_unit": "px"
+          }
+        }
+      ]
+    },
+    {
+      "label": "Background",
+      "name": "background",
+      "type": "group",
+      "children": [
+        {
+          "label": "Color",
+          "name": "color",
+          "type": "color",
+          "default": {
+            "opacity": 100
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Using Button Styles
+
+```html
+<a href="#" style="
+  background-color: {{ theme.buttons.background.color.color }};
+  color: {{ theme.buttons.text.font.color }};
+  font-size: {{ theme.buttons.text.font.size }}{{ theme.buttons.text.font.size_unit }};
+  padding: {{ theme.buttons.spacing.spacing.padding.top.value }}{{ theme.buttons.spacing.spacing.padding.top.units }} {{ theme.buttons.spacing.spacing.padding.right.value }}{{ theme.buttons.spacing.spacing.padding.right.units }};
+  border-radius: {{ theme.buttons.corner.radius }}px;
+" class="inline-block">
+  Themed Button
+</a>
+```
+
+## Form Styles
+
+Customize form elements:
+
+```json
+{
+  "label": "Forms",
+  "name": "forms",
+  "type": "group",
+  "children": [
+    {
+      "label": "Fields",
+      "name": "fields",
+      "type": "group",
+      "children": [
+        {
+          "label": "Text",
+          "name": "text",
+          "type": "group",
+          "children": [
+            {
+              "label": "Color",
+              "name": "color",
+              "type": "color"
+            }
+          ]
+        },
+        {
+          "label": "Background",
+          "name": "background",
+          "type": "group",
+          "children": [
+            {
+              "label": "Color",
+              "name": "color",
+              "type": "color",
+              "default": {
+                "color": "#FFFFFF",
+                "opacity": 100
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Field Types
+
+FreshJuice DEV supports various field types:
+
+<AccordionGroup>
+  <Accordion title="Color">
+    ```json
+    {
+      "name": "primary_color",
+      "type": "color",
+      "default": {
+        "color": "#111827",
+        "opacity": 100
+      }
+    }
+    ```
+    Access: `{{ theme.primary_color.color }}`
+  </Accordion>
+
+  <Accordion title="Font">
+    ```json
+    {
+      "name": "body_font",
+      "type": "font",
+      "default": {
+        "font": "Lato",
+        "font_set": "GOOGLE",
+        "fallback": "sans-serif",
+        "size": 16,
+        "size_unit": "px",
+        "variant": "400"
+      }
+    }
+    ```
+    Access: `{{ theme.body_font.font }}`, `{{ theme.body_font.size }}`
+  </Accordion>
+
+  <Accordion title="Number">
+    ```json
+    {
+      "name": "spacing",
+      "type": "number",
+      "display": "slider",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "suffix": "px",
+      "default": 40
+    }
+    ```
+    Access: `{{ theme.spacing }}`
+  </Accordion>
+
+  <Accordion title="Border">
+    ```json
+    {
+      "name": "border",
+      "type": "border",
+      "default": {
+        "top": {
+          "width": { "value": 1, "units": "px" },
+          "opacity": 100,
+          "style": "solid",
+          "color": "#000000"
+        }
+      }
+    }
+    ```
+    Access: `{{ theme.border.top.width.value }}{{ theme.border.top.width.units }}`
+  </Accordion>
+
+  <Accordion title="Spacing">
+    ```json
+    {
+      "name": "padding",
+      "type": "spacing",
+      "default": {
+        "padding": {
+          "top": { "value": 20, "units": "px" },
+          "right": { "value": 20, "units": "px" },
+          "bottom": { "value": 20, "units": "px" },
+          "left": { "value": 20, "units": "px" }
+        }
+      }
+    }
+    ```
+    Access: `{{ theme.padding.padding.top.value }}{{ theme.padding.padding.top.units }}`
+  </Accordion>
+
+  <Accordion title="Choice">
+    ```json
+    {
+      "name": "text_transform",
+      "type": "choice",
+      "choices": [
+        ["none", "None"],
+        ["uppercase", "Uppercase"],
+        ["lowercase", "Lowercase"]
+      ],
+      "display": "select",
+      "default": "none"
+    }
+    ```
+    Access: `{{ theme.text_transform }}`
+  </Accordion>
+</AccordionGroup>
+
+## Inherited Values
+
+Fields can inherit values from other fields:
+
+```json
+{
+  "name": "heading_font",
+  "type": "font",
+  "inherited_value": {
+    "property_value_paths": {
+      "color": "theme.global_fonts.secondary.color",
+      "font": "theme.global_fonts.secondary.font",
+      "font_set": "theme.global_fonts.secondary.font_set"
+    }
+  }
+}
+```
+
+This allows you to create a hierarchy of settings where more specific fields inherit from global settings.
+
+## Hidden Subfields
+
+Hide specific subfields of complex types:
+
+```json
+{
+  "name": "primary_color",
+  "type": "color",
+  "visibility": {
+    "hidden_subfields": {
+      "opacity": true
+    }
+  }
+}
+```
+
+This hides the opacity control in the theme editor while keeping the color picker visible.
+
+## Creating Custom Theme Fields
+
+<Steps>
+  <Step title="Edit fields.json">
+    Open `theme/fields.json` and add your custom field to the appropriate group or create a new group:
+
+    ```json
+    {
+      "label": "Custom Settings",
+      "name": "custom_settings",
+      "type": "group",
+      "children": [
+        {
+          "label": "Feature Toggle",
+          "name": "enable_feature",
+          "type": "boolean",
+          "default": false
+        }
+      ]
+    }
+    ```
+  </Step>
+
+  <Step title="Use in templates">
+    Access your custom field in any template:
+
+    ```html
+    {% if theme.custom_settings.enable_feature %}
+      <div>Feature is enabled!</div>
+    {% endif %}
+    ```
+  </Step>
+
+  <Step title="Upload to HubSpot">
+    Upload the updated fields.json:
+
+    ```bash
+    hs upload theme/fields.json fields.json
+    ```
+  </Step>
+
+  <Step title="Test in editor">
+    1. Go to Marketing > Files and Templates > Design Tools
+    2. Find your theme
+    3. Click "Edit theme settings"
+    4. Your new field should appear in the appropriate section
+  </Step>
+</Steps>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Logical Grouping" icon="layer-group">
+    Organize related fields into groups for better usability in the theme editor.
+  </Card>
+
+  <Card title="Sensible Defaults" icon="gear">
+    Always provide good default values so the theme works well out of the box.
+  </Card>
+
+  <Card title="Use Inheritance" icon="sitemap">
+    Leverage inherited values to create a settings hierarchy and reduce redundancy.
+  </Card>
+
+  <Card title="Clear Labels" icon="tag">
+    Use descriptive labels and help text to make fields self-explanatory.
+  </Card>
+</CardGroup>
+
+## Common Patterns
+
+### CSS Custom Properties
+
+Generate CSS variables from theme fields:
+
+```html
+<style>
+  :root {
+    --primary-color: {{ theme.global_colors.primary.color }};
+    --secondary-color: {{ theme.global_colors.secondary.color }};
+    --body-font: {{ theme.global_fonts.primary.font }};
+    --heading-font: {{ theme.global_fonts.secondary.font }};
+  }
+</style>
+```
+
+### Conditional Styling
+
+Apply different styles based on theme settings:
+
+```html
+{% if theme.custom_settings.rounded_corners %}
+  {% set corner_class = 'rounded-lg' %}
+{% else %}
+  {% set corner_class = 'rounded-none' %}
+{% endif %}
+
+<div class="{{ corner_class }}">
+  Content
+</div>
+```
+
+### Dynamic Spacing
+
+```html
+<section class="py-{{ theme.spacing.vertical_spacing / 4 }}">
+  <!-- Content with calculated spacing -->
+</section>
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Creating Modules" icon="puzzle-piece" href="/guides/creating-modules">
+    Learn how to create custom modules that use theme fields
+  </Card>
+
+  <Card title="Styling Components" icon="paintbrush" href="/guides/styling-components">
+    Apply theme fields with Tailwind CSS
+  </Card>
+
+  <Card title="Development" icon="code" href="/development/local-setup">
+    Set up your development environment
+  </Card>
+
+  <Card title="HubSpot Docs" icon="external-link" href="https://developers.hubspot.com/docs/cms/building-blocks/themes/theme-fields">
+    Official HubSpot theme fields documentation
+  </Card>
+</CardGroup>

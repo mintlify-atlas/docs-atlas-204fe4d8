@@ -1,0 +1,116 @@
+---
+title: random_int
+description: Generate a random 6-digit integer
+---
+
+## Overview
+
+The `random_int` macro generates a random 6-digit integer by concatenating six randomly selected digits. This is useful for creating pseudo-random numbers for IDs, cache busting, or other purposes requiring random numeric values.
+
+## Syntax
+
+```hbs
+{{ random_int() }}
+```
+
+## Parameters
+
+This macro takes no parameters.
+
+## Return Value
+
+Returns a 6-digit integer with values ranging from `000000` to `999999`.
+
+**Example output:** `482739`
+
+## Usage
+
+### Import the Macro
+
+```hbs
+{% from 'path/to/random-int.html' import random_int %}
+```
+
+### Basic Example
+
+```hbs
+{{ random_int() }}
+```
+
+**Output:** `537281` (value will vary)
+
+### Common Use Cases
+
+```hbs
+{# Cache busting for assets #}
+<link rel="stylesheet" href="{{ get_asset_url('styles.css') }}?v={{ random_int() }}">
+
+{# Generate random IDs #}
+<div id="element-{{ random_int() }}">
+  <!-- content -->
+</div>
+
+{# Create random order/reference numbers #}
+{% set order_number = 'ORD-' ~ random_int() %}
+
+{# Random values for testing #}
+<input type="hidden" name="nonce" value="{{ random_int() }}">
+```
+
+### Multiple Random Numbers
+
+```hbs
+{# Generate multiple different random numbers #}
+{% set rand1 = random_int() %}
+{% set rand2 = random_int() %}
+{% set rand3 = random_int() %}
+
+<div data-values="{{ rand1 }},{{ rand2 }},{{ rand3 }}"></div>
+```
+
+### Conditional Logic Based on Random Value
+
+```hbs
+{% set random_value = random_int() %}
+{% if random_value % 2 == 0 %}
+  <div class="variant-a">Even number: {{ random_value }}</div>
+{% else %}
+  <div class="variant-b">Odd number: {{ random_value }}</div>
+{% endif %}
+```
+
+## Implementation Details
+
+The macro generates a 6-digit number by:
+1. Looping 6 times (indices 0-5)
+2. On each iteration, randomly selecting a digit from 0-9 using HubL's `random` filter
+3. Concatenating all digits to form a 6-digit number
+
+```hbs
+{% for n in [0,1,2,3,4,5] %}
+  {{ [0,1,2,3,4,5,6,7,8,9]|random }}
+{% endfor %}
+```
+
+<Note>
+Leading zeros are possible (e.g., `000123`, `042857`). If you need numbers guaranteed to be 6 digits when used mathematically, consider adding validation or using a different approach.
+</Note>
+
+<Warning>
+This macro uses HubL's `random` filter which generates pseudo-random numbers. It should not be used for:
+- Cryptographic purposes
+- Security tokens
+- Situations requiring guaranteed uniqueness
+- Financial calculations requiring true randomness
+</Warning>
+
+## Related Macros
+
+- [unique_id](/api/macros/unique-id) - Generates a unique identifier using multiple random integers
+
+## Distribution
+
+The random distribution is approximately uniform across all digits (0-9), resulting in:
+- Range: `000000` to `999999`
+- Total possible values: 1,000,000
+- Each digit position has equal probability for each digit (0-9)

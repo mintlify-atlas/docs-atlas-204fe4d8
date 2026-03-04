@@ -1,0 +1,474 @@
+---
+title: Adding JavaScript
+description: Learn how to add custom JavaScript functionality to FreshJuice DEV modules using Alpine.js
+icon: 'js'
+---
+
+FreshJuice DEV uses Alpine.js as its JavaScript framework, providing a lightweight and declarative way to add interactivity to your modules.
+
+## JavaScript Architecture
+
+The theme's JavaScript is organized in the `source/js/` directory:
+
+```
+source/js/
+├── main.js                      # Main entry point
+├── modules/
+│   ├── _debugLog.js            # Debug logging utility
+│   ├── _loadScript.js          # Dynamic script loader
+│   ├── _loadStylesheet.js      # Dynamic stylesheet loader
+│   ├── _getSearchParams.js     # URL parameter utility
+│   └── Alpine.data/
+│       └── DOM.js              # Alpine.js data component
+```
+
+## Main JavaScript File
+
+The `main.js` file is the entry point for all JavaScript:
+
+```javascript source/js/main.js
+import debugLog from './modules/_debugLog';
+import loadScript from './modules/_loadScript';
+import flyingPages from "flying-pages-module";
+import Alpine from "alpinejs";
+import intersect from "@alpinejs/intersect";
+import collapse from "@alpinejs/collapse";
+import focus from "@alpinejs/focus";
+import dataDOM from "./modules/Alpine.data/DOM";
+
+window.Alpine = Alpine;
+
+// Add plugins to Alpine
+Alpine.plugin(intersect);
+Alpine.plugin(collapse);
+Alpine.plugin(focus);
+
+Alpine.data("xDOM", dataDOM);
+
+// Start Alpine when the page is ready
+domReady(() => {
+  Alpine.start();
+  flyingPages({
+    // Prefetch all pages by default
+  });
+});
+```
+
+## Alpine.js Basics
+
+Alpine.js is a rugged, minimal framework for composing JavaScript behavior in your markup. Think of it as jQuery for the modern web.
+
+### Core Directives
+
+<Steps>
+  <Step title="x-data: Component State">
+    Define reactive data for your component:
+
+    ```html
+    <div x-data="{ open: false }">
+      <button @click="open = !open">Toggle</button>
+      <div x-show="open">Content</div>
+    </div>
+    ```
+  </Step>
+
+  <Step title="x-show: Conditional Display">
+    Show/hide elements based on state:
+
+    ```html
+    <div x-data="{ visible: true }">
+      <div x-show="visible">I'm visible!</div>
+      <button @click="visible = !visible">Toggle</button>
+    </div>
+    ```
+  </Step>
+
+  <Step title="@click: Event Handling">
+    Handle user interactions:
+
+    ```html
+    <button @click="count++" x-data="{ count: 0 }">
+      Clicked <span x-text="count"></span> times
+    </button>
+    ```
+  </Step>
+
+  <Step title="x-text: Text Content">
+    Bind text content to data:
+
+    ```html
+    <div x-data="{ message: 'Hello World' }">
+      <p x-text="message"></p>
+    </div>
+    ```
+  </Step>
+</Steps>
+
+## Real-World Examples
+
+### Tabs Component
+
+Here's how the Tabs module uses Alpine.js:
+
+```html theme/modules/tabs.module/module.html
+<div
+  x-data="{
+     selectedId: null,
+     init() { this.$nextTick(() => this.select(this.$id('tab', 1))) },
+     select(id) { this.selectedId = id },
+     isSelected(id) { return this.selectedId === id },
+     whichChild(el, parent) { return Array.from(parent.children).indexOf(el) + 1 }
+  }"
+  x-id="['tab']">
+  
+  <ul
+    x-ref="tablist"
+    @keydown.right.prevent.stop="$focus.wrap().next()"
+    @keydown.left.prevent.stop="$focus.wrap().prev()"
+    role="tablist">
+    {% for item in module.tabs %}
+      <li>
+        <button
+          :id="$id('tab', whichChild($el.parentElement, $refs.tablist))"
+          @click="select($el.id)"
+          @focus="select($el.id)"
+          :tabindex="isSelected($el.id) ? 0 : -1"
+          :aria-selected="isSelected($el.id)"
+          :class="isSelected($el.id) ? 'border-gray-200 bg-cursor' : 'border-transparent'"
+          class="inline-flex rounded-t-md border-t border-l border-r px-5 py-2.5"
+          type="button"
+          role="tab">
+          {{ item.tab_name }}
+        </button>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <div role="tabpanels">
+    {% for item in module.tabs %}
+      <section
+        x-show="isSelected($id('tab', whichChild($el, $el.parentElement)))"
+        :aria-labelledby="$id('tab', whichChild($el, $el.parentElement))"
+        role="tabpanel">
+        <div class="prose max-w-full">
+          {{ item.tab_content }}
+        </div>
+      </section>
+    {% endfor %}
+  </div>
+</div>
+```
+
+**Key features:**
+- `x-data` defines component state and methods
+- `init()` runs when component initializes
+- `x-ref` creates references to elements
+- `:class` binds classes dynamically
+- `@click` and `@focus` handle user events
+- `$id()` generates unique IDs for accessibility
+
+### Accordion Component
+
+Create an expandable accordion:
+
+```html
+<div x-data="{ activeId: null }">
+  {% for item in module.accordion_items %}
+    <div class="border-b">
+      <button
+        @click="activeId = (activeId === {{ loop.index }}) ? null : {{ loop.index }}"
+        class="w-full flex justify-between items-center py-4 text-left">
+        <span class="font-semibold">{{ item.title }}</span>
+        <svg
+          :class="activeId === {{ loop.index }} ? 'rotate-180' : ''"
+          class="w-5 h-5 transition-transform"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      <div
+        x-show="activeId === {{ loop.index }}"
+        x-collapse
+        class="pb-4">
+        {{ item.content }}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+```
+
+### Modal/Dialog
+
+Create a modal dialog:
+
+```html
+<div x-data="{ open: false }">
+  <!-- Trigger button -->
+  <button @click="open = true" class="bg-terminal text-cursor px-6 py-2 rounded-md">
+    Open Modal
+  </button>
+
+  <!-- Modal overlay -->
+  <div
+    x-show="open"
+    @click="open = false"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    class="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+
+  <!-- Modal content -->
+  <div
+    x-show="open"
+    @click.outside="open = false"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0 translate-y-4"
+    x-transition:enter-end="opacity-100 translate-y-0"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100 translate-y-0"
+    x-transition:leave-end="opacity-0 translate-y-4"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+      <h2 class="text-2xl font-bold mb-4">Modal Title</h2>
+      <p class="mb-4">Modal content goes here.</p>
+      <button @click="open = false" class="bg-terminal text-cursor px-4 py-2 rounded-md">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+```
+
+## Alpine.js Plugins
+
+FreshJuice DEV includes several Alpine.js plugins:
+
+### Intersect Plugin
+
+Detect when elements enter/leave viewport:
+
+```html
+<div
+  x-data="{ visible: false }"
+  x-intersect="visible = true"
+  :class="visible ? 'opacity-100' : 'opacity-0'"
+  class="transition-opacity duration-1000">
+  Fades in when scrolled into view
+</div>
+```
+
+### Collapse Plugin
+
+Smooth height transitions:
+
+```html
+<div x-data="{ expanded: false }">
+  <button @click="expanded = !expanded">Toggle</button>
+  <div x-show="expanded" x-collapse>
+    This content smoothly expands and collapses
+  </div>
+</div>
+```
+
+### Focus Plugin
+
+Manage focus within components:
+
+```html
+<div
+  x-data="{ open: false }"
+  @keydown.escape="open = false">
+  <button @click="open = true">Open Menu</button>
+  <nav
+    x-show="open"
+    @keydown.tab="$focus.wrap()">
+    <a href="#">Link 1</a>
+    <a href="#">Link 2</a>
+    <a href="#">Link 3</a>
+  </nav>
+</div>
+```
+
+## Module-Specific JavaScript
+
+For module-specific JavaScript, create a `module.js` file in your module directory:
+
+```javascript theme/modules/my-module.module/module.js
+// This runs when the module is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  const elements = document.querySelectorAll('.my-module');
+  
+  elements.forEach(element => {
+    // Initialize your module
+  });
+});
+```
+
+<Warning>
+Modules with JavaScript files will load that JavaScript on every page where the module appears. Keep module JS minimal and consider using Alpine.js instead.
+</Warning>
+
+## Utility Functions
+
+### Debug Logging
+
+```javascript
+import debugLog from './modules/_debugLog';
+
+debugLog('Debug message', { data: 'value' });
+```
+
+### Loading External Scripts
+
+```javascript
+import loadScript from './modules/_loadScript';
+
+loadScript('https://example.com/script.js', 'async', () => {
+  console.log('Script loaded!');
+});
+```
+
+### Getting URL Parameters
+
+```javascript
+import getSearchParams from './modules/_getSearchParams';
+
+const params = getSearchParams();
+console.log(params.utm_source); // Access URL parameters
+```
+
+## Custom Alpine Components
+
+Create reusable Alpine components:
+
+```javascript source/js/modules/Alpine.data/MyComponent.js
+export default () => ({
+  count: 0,
+  
+  increment() {
+    this.count++;
+  },
+  
+  decrement() {
+    this.count--;
+  },
+  
+  reset() {
+    this.count = 0;
+  }
+});
+```
+
+Register it in `main.js`:
+
+```javascript
+import myComponent from './modules/Alpine.data/MyComponent';
+
+Alpine.data('myComponent', myComponent);
+```
+
+Use it in your templates:
+
+```html
+<div x-data="myComponent">
+  <p x-text="count"></p>
+  <button @click="increment">+</button>
+  <button @click="decrement">-</button>
+  <button @click="reset">Reset</button>
+</div>
+```
+
+## Performance Optimization
+
+### Flying Pages (Prefetching)
+
+FreshJuice DEV includes Flying Pages for intelligent page prefetching:
+
+```javascript
+flyingPages({
+  delay: 0,              // Prefetch delay in ms
+  ignoreKeywords: [],    // URLs to ignore
+  maxRPS: 3,             // Max requests per second
+  hoverDelay: 50         // Delay before prefetch on hover
+});
+```
+
+### Lazy Loading
+
+Lazy load heavy components:
+
+```html
+<div
+  x-data="{ loaded: false }"
+  x-intersect.once="loaded = true">
+  <template x-if="loaded">
+    <!-- Heavy component loads only when visible -->
+    <div>Heavy content here</div>
+  </template>
+</div>
+```
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Keep It Declarative" icon="code">
+    Use Alpine.js directives in HTML rather than imperative JavaScript when possible.
+  </Card>
+
+  <Card title="Minimal Module JS" icon="feather">
+    Avoid adding JavaScript to module.js files. Use Alpine.js in templates instead.
+  </Card>
+
+  <Card title="Accessibility First" icon="universal-access">
+    Use proper ARIA attributes and keyboard navigation in interactive components.
+  </Card>
+
+  <Card title="Progressive Enhancement" icon="layer-group">
+    Ensure core functionality works without JavaScript when possible.
+  </Card>
+</CardGroup>
+
+## Debugging
+
+### Alpine Devtools
+
+Install the Alpine.js Devtools browser extension:
+- [Chrome Extension](https://chrome.google.com/webstore/detail/alpinejs-devtools/fopaemeedckajflibkpifppcankfmbhk)
+- [Firefox Add-on](https://addons.mozilla.org/en-US/firefox/addon/alpinejs-devtools/)
+
+### Console Access
+
+Alpine is exposed on `window.Alpine` for debugging:
+
+```javascript
+// Access Alpine from console
+window.Alpine.version
+
+// Inspect component state
+$data // In browser console
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Creating Modules" icon="puzzle-piece" href="/guides/creating-modules">
+    Learn how to create custom HubSpot modules
+  </Card>
+
+  <Card title="Styling Components" icon="paintbrush" href="/guides/styling-components">
+    Style your components with Tailwind CSS
+  </Card>
+
+  <Card title="Alpine.js Docs" icon="external-link" href="https://alpinejs.dev">
+    Official Alpine.js documentation
+  </Card>
+
+  <Card title="Module Reference" icon="book" href="/modules/overview">
+    Browse all available modules
+  </Card>
+</CardGroup>

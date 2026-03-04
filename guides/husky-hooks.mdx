@@ -1,0 +1,524 @@
+---
+title: Git Hooks with Husky
+description: Automated quality checks and workflows with Husky git hooks in FreshJuice DEV
+---
+
+# Git Hooks with Husky
+
+FreshJuice DEV uses [Husky](https://typicode.github.io/husky/) to automate quality checks and maintain code consistency through git hooks.
+
+## What is Husky?
+
+Husky makes it easy to use git hooks as if they were npm scripts. It helps you:
+
+- Run tests before commits
+- Lint and format code automatically
+- Validate commit messages
+- Prevent bad commits and pushes
+- Notify team members of important changes
+
+## Installation
+
+Husky is already configured in FreshJuice DEV. It auto-installs when you run:
+
+```bash
+npm install
+```
+
+The `prepare` script in `package.json:21` handles initialization:
+
+```json
+"scripts": {
+  "prepare": "husky"
+}
+```
+
+## Active Hooks
+
+FreshJuice DEV includes two pre-configured hooks:
+
+### 1. Pre-commit Hook
+
+Automatically cleans module metadata before every commit.
+
+**Location**: `.husky/pre-commit`
+
+**What it does**:
+```bash
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+if ! [ -x "$(command -v jq)" ]; then
+  echo "Error: jq is not installed." >&2
+  exit 1
+fi
+
+for file in ./theme/modules/*.module/meta.json; do
+  jq 'del(.module_id)' $file > $file.tmp
+  mv $file.tmp $file
+  git add $file
+done
+```
+
+**Purpose**: 
+- Removes `module_id` from `meta.json` files
+- Prevents merge conflicts from HubSpot-generated IDs
+- Keeps version control clean and portable
+
+**Requirements**:
+- Requires `jq` (JSON processor) to be installed
+- Install with: `brew install jq` (macOS) or `apt-get install jq` (Linux)
+
+### 2. Post-merge Hook
+
+Notifies you when dependencies have changed after pulling/merging.
+
+**Location**: `.husky/post-merge`
+
+**What it does**:
+```bash
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+function changed {
+  git diff --name-only HEAD@{1} HEAD | grep "^$1" > /dev/null 2>&1
+}
+
+if changed 'package-lock.json'; then
+  echo "------------------------------------------------------------------"
+  echo "📦 package-lock.json has changed."
+  echo "🚨 Please run npm install to bring your dependencies up to date."
+  echo "------------------------------------------------------------------"
+fi
+```
+
+**Purpose**:
+- Detects changes to `package-lock.json`
+- Reminds you to run `npm install`
+- Prevents version mismatch issues
+
+## Creating Custom Hooks
+
+### Step 1: Create Hook File
+
+Create a new hook in `.husky/`:
+
+```bash
+npx husky add .husky/pre-push "npm test"
+```
+
+Or manually create `.husky/pre-push`:
+
+```bash
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+npm test
+```
+
+### Step 2: Make it Executable
+
+```bash
+chmod +x .husky/pre-push
+```
+
+### Step 3: Test the Hook
+
+```bash
+git push  # Hook will run automatically
+```
+
+## Common Hook Patterns
+
+### Lint Staged Files
+
+Run linting only on staged files:
+
+**Install lint-staged**:
+```bash
+npm install --save-dev lint-staged
+```
+
+**Add to `.husky/pre-commit`**:
+```bash
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+npx lint-staged
+```
+
+**Configure in `package.json`**:
+```json
+"lint-staged": {
+  "*.js": "eslint --fix",
+  "*.html": "prettier --write",
+  "*.css": "prettier --write"
+}
+```
+
+### Validate Commit Messages
+
+Enforce conventional commit format:
+
+**`.husky/commit-msg`**:
+```bash
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+MSG_FILE=$1
+PATTERN="^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .{1,50}"
+
+if ! grep -qE "$PATTERN" "$MSG_FILE"; then
+  echo "Error: Commit message must follow conventional commits format"
+  echo "Example: feat(sections): add hero banner section"
+  exit 1
+fi
+```
+
+### Run Tests Before Push
+
+**`.husky/pre-push`**:
+```bash
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "Running tests before push..."
+npm test
+
+if [ $? -ne 0 ]; then
+  echo "Tests failed. Push aborted."
+  exit 1
+fi
+```
+
+### Build Theme Before Commit
+
+**`.husky/pre-commit`**:
+```bash
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "Building theme..."
+npm run build:js
+npm run build:tailwind
+
+git add ./theme/js/main.js
+git add ./theme/css/tailwind.css
+```
+
+### Check for Large Files
+
+**`.husky/pre-commit`**:
+```bash
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+MAX_SIZE=5242880  # 5MB in bytes
+
+for file in $(git diff --cached --name-only); do
+  if [ -f "$file" ]; then
+    size=$(wc -c < "$file")
+    if [ $size -gt $MAX_SIZE ]; then
+      echo "Error: $file is larger than 5MB"
+      exit 1
+    fi
+  fi
+done
+```
+
+## Available Git Hooks
+
+### Commit Workflow
+- `pre-commit`: Before commit is created
+- `prepare-commit-msg`: Before commit message editor opens
+- `commit-msg`: After commit message is saved
+- `post-commit`: After commit is created
+
+### Merge Workflow
+- `pre-merge-commit`: Before merge commit is created
+- `post-merge`: After merge is completed
+
+### Push Workflow
+- `pre-push`: Before push to remote
+- `post-push`: After push to remote (requires setup)
+
+### Other Hooks
+- `pre-rebase`: Before rebase
+- `post-checkout`: After checkout
+- `post-rewrite`: After amend or rebase
+
+## Best Practices
+
+### 1. Keep Hooks Fast
+
+Slow hooks interrupt workflow. Keep execution under 5 seconds:
+
+```bash
+# Good: Fast checks on staged files
+npx lint-staged
+
+# Bad: Slow full project lint
+npm run lint
+```
+
+### 2. Provide Clear Error Messages
+
+```bash
+if [ $? -ne 0 ]; then
+  echo "❌ Build failed!"
+  echo "💡 Run 'npm run build' to see detailed errors"
+  exit 1
+fi
+```
+
+### 3. Allow Bypassing in Emergencies
+
+Users can skip hooks with `--no-verify`:
+
+```bash
+git commit --no-verify -m "Emergency fix"
+```
+
+Document when this is acceptable.
+
+### 4. Check Dependencies
+
+Verify required tools are installed:
+
+```bash
+if ! [ -x "$(command -v jq)" ]; then
+  echo "Error: jq is not installed" >&2
+  exit 1
+fi
+```
+
+### 5. Add to Documentation
+
+Document your hooks in your README:
+
+```markdown
+## Git Hooks
+
+This project uses Husky for git hooks:
+
+- `pre-commit`: Cleans module metadata
+- `post-merge`: Checks for dependency changes
+```
+
+## Debugging Hooks
+
+### Enable Verbose Output
+
+Add debugging to your hooks:
+
+```bash
+#!/bin/sh
+set -x  # Print commands as they execute
+. "$(dirname "$0")/_/husky.sh"
+
+echo "Running pre-commit hook..."
+# Your hook code
+```
+
+### Check Hook Execution
+
+Verify hooks are running:
+
+```bash
+git commit -m "test" --dry-run
+```
+
+### View Hook Errors
+
+Git shows hook output in terminal. Check for:
+- Permission errors (use `chmod +x`)
+- Command not found (install dependencies)
+- Syntax errors (test with `bash .husky/pre-commit`)
+
+### Test Hooks Manually
+
+Run hooks directly:
+
+```bash
+bash .husky/pre-commit
+```
+
+## Real-World Examples
+
+### Example 1: Theme Version Bump
+
+Automatically bump version before release:
+
+**`.husky/pre-push`**:
+```bash
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+if [ "$BRANCH" = "main" ]; then
+  echo "Bumping theme version..."
+  ./scripts/bump-theme-version.sh patch
+  git add theme.json
+  git commit -m "chore: bump theme version"
+fi
+```
+
+### Example 2: Sync with HubSpot
+
+Upload changes to HubSpot after successful commit:
+
+**`.husky/post-commit`**:
+```bash
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+if [ "$SKIP_UPLOAD" != "true" ]; then
+  echo "Uploading to HubSpot..."
+  npm run upload:hubspot
+fi
+```
+
+Skip with: `SKIP_UPLOAD=true git commit -m "message"`
+
+### Example 3: Clean Build Artifacts
+
+**`.husky/post-checkout`**:
+```bash
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "Cleaning build artifacts..."
+rm -rf ./_temp ./_dist
+```
+
+## Disabling Hooks
+
+### Temporarily Disable
+
+Skip hooks for one command:
+
+```bash
+git commit --no-verify -m "Quick fix"
+```
+
+### Disable All Hooks
+
+Rename the `.husky` directory:
+
+```bash
+mv .husky .husky.disabled
+```
+
+Re-enable:
+
+```bash
+mv .husky.disabled .husky
+```
+
+### Disable Specific Hook
+
+Rename the hook file:
+
+```bash
+mv .husky/pre-commit .husky/pre-commit.disabled
+```
+
+## Troubleshooting
+
+### Hook Not Running
+
+**Check if Husky is installed:**
+```bash
+ls -la .husky
+```
+
+**Reinstall Husky:**
+```bash
+rm -rf .husky
+npm install
+```
+
+### Permission Denied
+
+**Make hooks executable:**
+```bash
+chmod +x .husky/*
+```
+
+### Command Not Found
+
+**Install missing dependency:**
+```bash
+# For jq
+brew install jq  # macOS
+sudo apt-get install jq  # Ubuntu
+```
+
+### Hook Exits Without Error
+
+**Add explicit exit:**
+```bash
+if [ $? -ne 0 ]; then
+  exit 1  # Explicit exit on failure
+fi
+```
+
+## CI/CD Integration
+
+Hooks don't run in CI/CD by default. Replicate checks:
+
+**GitHub Actions example:**
+```yaml
+name: CI
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm install
+      - name: Run pre-commit checks
+        run: bash .husky/pre-commit
+      - name: Build theme
+        run: npm run build
+```
+
+## Migration Guide
+
+### From Husky v4 to v8+
+
+FreshJuice DEV uses Husky v9. If migrating from v4:
+
+1. **Remove old configuration:**
+   ```bash
+   npm uninstall husky@4
+   ```
+
+2. **Install new version:**
+   ```bash
+   npm install --save-dev husky@9
+   ```
+
+3. **Initialize:**
+   ```bash
+   npx husky init
+   ```
+
+4. **Migrate hooks:**
+   Move from `package.json` to `.husky/` directory
+
+## Next Steps
+
+- Learn about [Performance Optimization](/guides/performance-optimization)
+- Explore [Custom Sections](/guides/custom-sections)
+- Review [Husky documentation](https://typicode.github.io/husky/)
+- Set up [lint-staged](https://github.com/okonet/lint-staged)
+
+## Resources
+
+- Husky: [Official Documentation](https://typicode.github.io/husky/)
+- Git Hooks: [Git Documentation](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks)
+- Conventional Commits: [Specification](https://www.conventionalcommits.org/)

@@ -1,0 +1,302 @@
+---
+title: Tailwind CSS Configuration
+description: Learn how Tailwind CSS v4 is configured in the FreshJuice DEV theme
+---
+
+FreshJuice DEV uses Tailwind CSS v4 with a custom configuration and theme extensions.
+
+## Tailwind CSS v4
+
+The theme uses the latest Tailwind CSS v4, which introduces a new configuration approach using CSS-based theming instead of JavaScript configuration files.
+
+## Main Configuration File
+
+The primary configuration is in `source/css/tailwind.css`:
+
+```css
+@import "tailwindcss" source(none);
+
+@source "../../theme/**/*.html";
+@source "../../theme/**/*.js";
+@source "../js/farmerswife.js";
+@source "./**/*.css";
+
+@theme {
+  /* Custom colors */
+  --color-cursor: #FFFFFF;
+  --color-cursor-500: #FFFFFF;
+  --color-terminal: #000000;
+  --color-terminal-500: #000000;
+
+  /* Custom fonts */
+  --font-cursive: "Caveat", cursive;
+
+  /* Custom aspect ratios */
+  --aspect-auto: auto;
+  --aspect-box: 1;
+  --aspect-landscape: 4 / 3;
+  --aspect-portrait: 3 / 4;
+  --aspect-video: 16 / 9;
+  --aspect-widescreen: 16 / 9;
+  --aspect-ultrawide: 18 / 5;
+  --aspect-golden: 1.6180 / 1;
+  --aspect-macbook: 16 / 10;
+
+  /* Custom spacing */
+  --spacing-screenSinNav: calc(100vh - 5rem);
+}
+```
+
+## Content Sources
+
+Tailwind v4 uses `@source` directives to scan files for class names:
+
+```css
+@source "../../theme/**/*.html";  /* HubL templates */
+@source "../../theme/**/*.js";    /* Module JavaScript */
+@source "../js/farmerswife.js";   /* Custom JS */
+@source "./**/*.css";              /* All CSS files */
+```
+
+This ensures Tailwind includes all classes used across your theme.
+
+## Custom Theme
+
+The `@theme` block defines custom design tokens:
+
+### Custom Colors
+
+Define brand colors:
+
+```css
+@theme {
+  --color-cursor: #FFFFFF;
+  --color-terminal: #000000;
+}
+```
+
+Use in HTML:
+
+```html
+<div class="bg-cursor text-terminal">
+  Custom colors
+</div>
+```
+
+### Custom Fonts
+
+Add custom font families:
+
+```css
+@theme {
+  --font-cursive: "Caveat", cursive;
+}
+```
+
+Use in HTML:
+
+```html
+<h1 class="font-cursive">
+  Handwritten style heading
+</h1>
+```
+
+### Custom Spacing
+
+Create dynamic spacing values:
+
+```css
+@theme {
+  --spacing-screenSinNav: calc(100vh - 5rem);
+}
+```
+
+Use in HTML:
+
+```html
+<div class="h-screenSinNav">
+  Full height minus navigation
+</div>
+```
+
+### Custom Aspect Ratios
+
+Define aspect ratio utilities:
+
+```css
+@theme {
+  --aspect-video: 16 / 9;
+  --aspect-golden: 1.6180 / 1;
+  --aspect-macbook: 16 / 10;
+}
+```
+
+Use in HTML:
+
+```html
+<div class="aspect-video">
+  <iframe src="..."></iframe>
+</div>
+```
+
+## CSS Architecture
+
+The theme organizes CSS into logical layers:
+
+```css
+/* Base styles */
+@import "./base/reset.css";
+@import "./base/animations.css";
+@import "./base/typography.css";
+@import "./base/forms.css";
+@import "./base/buttons.css";
+
+/* Components */
+@import "./components/blog-comments.css";
+@import "./components/yt-lite.css";
+@import "./components/system.css";
+
+/* Utilities */
+@import "./utilities/utils.css";
+```
+
+### Base Layer
+
+Foundational styles applied globally:
+
+- **reset.css** - Browser normalization
+- **animations.css** - Keyframe animations
+- **typography.css** - Text styles and rhythm
+- **forms.css** - Form element styles
+- **buttons.css** - Button styles
+
+### Components Layer
+
+Reusable component styles:
+
+- **blog-comments.css** - Blog comment styles
+- **yt-lite.css** - YouTube embed styles
+- **system.css** - System page styles
+
+### Utilities Layer
+
+Custom utility classes:
+
+- **utils.css** - Helper utilities
+
+## Building CSS
+
+Tailwind CSS is compiled using the Tailwind CLI:
+
+```bash
+# Development (watch mode)
+npm run watch:tailwind
+
+# Production build
+npm run build:tailwind
+```
+
+The build process:
+1. Reads `source/css/tailwind.css`
+2. Scans source files for classes
+3. Generates optimized CSS
+4. Outputs to `theme/css/tailwind.css`
+
+## Custom Utilities
+
+Create custom utilities in `source/css/utilities/utils.css`:
+
+```css
+.text-balance {
+  text-wrap: balance;
+}
+
+.gradient-text {
+  background: linear-gradient(to right, #f59e0b, #ef4444);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+```
+
+## Responsive Design
+
+Use Tailwind's responsive prefixes:
+
+```html
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+  <div>Column 1</div>
+  <div>Column 2</div>
+  <div>Column 3</div>
+</div>
+```
+
+## Dark Mode
+
+Implement dark mode with the `dark:` prefix:
+
+```html
+<div class="bg-white dark:bg-gray-900 text-black dark:text-white">
+  Adapts to color scheme preference
+</div>
+```
+
+## Performance
+
+Tailwind v4 optimizations:
+
+- **Just-in-time compilation** - Only generates used classes
+- **Fast builds** - Rust-based compiler
+- **Small bundle size** - No unused CSS
+- **Modern CSS** - Uses native CSS features
+
+## Best Practices
+
+### Use Semantic Class Names
+
+```html
+<!-- Good -->
+<article class="max-w-prose mx-auto space-y-4">
+  <h1 class="text-3xl font-bold">Article Title</h1>
+</article>
+
+<!-- Avoid -->
+<div class="w-full max-w-screen-md ml-auto mr-auto mt-4 mb-4">
+  <h1 class="text-2xl md:text-3xl font-700">Article Title</h1>
+</div>
+```
+
+### Extract Repeated Patterns
+
+For frequently used combinations, create components in CSS or modules.
+
+### Keep It Maintainable
+
+- Use consistent spacing scales
+- Stick to the design system
+- Leverage custom theme values
+- Document custom utilities
+
+## Extending the Theme
+
+Add new design tokens to `@theme`:
+
+```css
+@theme {
+  /* Add custom colors */
+  --color-brand-blue: #0066cc;
+  --color-brand-green: #00aa44;
+  
+  /* Add custom fonts */
+  --font-heading: "Inter", sans-serif;
+  
+  /* Add custom breakpoints */
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
+}
+```
+
+## Resources
+
+- [Tailwind CSS v4 Documentation](https://tailwindcss.com/docs)
+- [Tailwind CSS v4 Migration Guide](https://tailwindcss.com/docs/v4-beta)
+- [Tailwind CSS GitHub](https://github.com/tailwindlabs/tailwindcss)

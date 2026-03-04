@@ -1,0 +1,419 @@
+---
+title: Alpine.js Integration
+description: Learn how Alpine.js powers interactive components in the FreshJuice DEV theme
+---
+
+FreshJuice DEV uses Alpine.js for lightweight, declarative interactivity without the complexity of larger frameworks.
+
+## Alpine.js Setup
+
+Alpine.js is bundled with the theme in `source/js/main.js`:
+
+```javascript
+import Alpine from "alpinejs";
+import intersect from "@alpinejs/intersect";
+import collapse from "@alpinejs/collapse";
+import focus from "@alpinejs/focus";
+import dataDOM from "./modules/Alpine.data/DOM";
+
+// Make Alpine available globally
+window.Alpine = Alpine;
+
+// Register plugins
+Alpine.plugin(intersect);
+Alpine.plugin(collapse);
+Alpine.plugin(focus);
+
+// Register custom data
+Alpine.data("xDOM", dataDOM);
+
+// Initialize Alpine
+Alpine.start();
+```
+
+## Official Plugins
+
+The theme includes three official Alpine.js plugins:
+
+### Collapse Plugin
+
+Smooth height transitions for showing/hiding content.
+
+**Installation:**
+
+```javascript
+import collapse from "@alpinejs/collapse";
+Alpine.plugin(collapse);
+```
+
+**Usage in templates:**
+
+```html
+<div x-data="{ open: false }">
+  <button @click="open = !open">
+    Toggle Content
+  </button>
+  
+  <div x-show="open" x-collapse>
+    <p>This content smoothly expands and collapses.</p>
+  </div>
+</div>
+```
+
+**Real example from accordion module:**
+
+```html
+<div x-data="{
+      id: {{ loop.index }},
+      get expanded() { return this.active === this.id },
+      set expanded(value) { this.active = value ? this.id : null },
+    }" role="region" class="rounded-md bg-cursor shadow">
+  <h2 class="my-0 leading-tight">
+    <button
+      @click="expanded = !expanded"
+      :aria-expanded="expanded"
+      class="flex w-full items-center justify-between px-6 py-4"
+    >
+      <span>{{ item.question }}</span>
+      <span x-show="expanded" aria-hidden="true">&minus;</span>
+      <span x-show="!expanded" aria-hidden="true">&plus;</span>
+    </button>
+  </h2>
+  <div x-show="expanded" x-collapse>
+    <div class="px-6 pb-4 prose">{{ item.answer }}</div>
+  </div>
+</div>
+```
+
+### Intersect Plugin
+
+Trigger actions when elements enter or leave the viewport.
+
+**Installation:**
+
+```javascript
+import intersect from "@alpinejs/intersect";
+Alpine.plugin(intersect);
+```
+
+**Usage in templates:**
+
+```html
+<div 
+  x-data="{ seen: false }"
+  x-intersect="seen = true"
+  x-show="seen"
+  x-transition
+>
+  <p>This appears when scrolled into view.</p>
+</div>
+```
+
+**Advanced usage:**
+
+```html
+<div
+  x-data="{ inView: false }"
+  x-intersect:enter="inView = true"
+  x-intersect:leave="inView = false"
+  :class="{ 'opacity-100': inView, 'opacity-0': !inView }"
+>
+  <p>Fades in when visible, fades out when not.</p>
+</div>
+```
+
+**Threshold option:**
+
+```html
+<div
+  x-intersect.threshold.50="console.log('50% visible')"
+>
+  <p>Triggers when 50% of element is visible.</p>
+</div>
+```
+
+### Focus Plugin
+
+Manage focus within elements (useful for modals, dropdowns).
+
+**Installation:**
+
+```javascript
+import focus from "@alpinejs/focus";
+Alpine.plugin(focus);
+```
+
+**Usage in templates:**
+
+```html
+<div 
+  x-data="{ open: false }"
+  x-trap.noscroll="open"
+>
+  <button @click="open = true">Open Modal</button>
+  
+  <div x-show="open" class="modal">
+    <input type="text" placeholder="Focused automatically">
+    <button @click="open = false">Close</button>
+  </div>
+</div>
+```
+
+**Focus trap with tab cycle:**
+
+```html
+<div x-data="{ open: false }">
+  <button @click="open = true">Open Menu</button>
+  
+  <nav x-show="open" x-trap.inert.noscroll="open">
+    <a href="#">Link 1</a>
+    <a href="#">Link 2</a>
+    <a href="#">Link 3</a>
+    <button @click="open = false">Close</button>
+  </nav>
+</div>
+```
+
+## Custom Alpine Data
+
+The theme includes a custom `xDOM` data component:
+
+```javascript
+Alpine.data("xDOM", dataDOM);
+```
+
+Used in the base layout:
+
+```html
+<html x-data="xDOM">
+  <!-- Global Alpine data available throughout -->
+</html>
+```
+
+## Common Patterns
+
+### Toggle Pattern
+
+Show/hide content:
+
+```html
+<div x-data="{ open: false }">
+  <button @click="open = !open">Toggle</button>
+  <div x-show="open">Content</div>
+</div>
+```
+
+### Dropdown Menu
+
+Accessible dropdown with focus trap:
+
+```html
+<div x-data="{ open: false }" @click.outside="open = false">
+  <button @click="open = !open">Menu</button>
+  
+  <div 
+    x-show="open" 
+    x-collapse
+    x-trap="open"
+    class="absolute mt-2"
+  >
+    <a href="#" class="block px-4 py-2">Item 1</a>
+    <a href="#" class="block px-4 py-2">Item 2</a>
+  </div>
+</div>
+```
+
+### Modal Dialog
+
+Full-featured modal:
+
+```html
+<div x-data="{ showModal: false }">
+  <button @click="showModal = true">Open Modal</button>
+  
+  <div 
+    x-show="showModal"
+    x-trap.noscroll="showModal"
+    @keydown.escape.window="showModal = false"
+    class="fixed inset-0 z-50 flex items-center justify-center"
+  >
+    <!-- Backdrop -->
+    <div 
+      @click="showModal = false"
+      class="absolute inset-0 bg-black/50"
+    ></div>
+    
+    <!-- Modal content -->
+    <div class="relative bg-white rounded-lg p-8 max-w-lg">
+      <h2>Modal Title</h2>
+      <p>Modal content goes here.</p>
+      <button @click="showModal = false">Close</button>
+    </div>
+  </div>
+</div>
+```
+
+### Tabs Component
+
+Tab interface:
+
+```html
+<div x-data="{ activeTab: 1 }">
+  <div class="flex border-b">
+    <button 
+      @click="activeTab = 1"
+      :class="{ 'border-blue-500': activeTab === 1 }"
+      class="px-4 py-2 border-b-2"
+    >
+      Tab 1
+    </button>
+    <button 
+      @click="activeTab = 2"
+      :class="{ 'border-blue-500': activeTab === 2 }"
+      class="px-4 py-2 border-b-2"
+    >
+      Tab 2
+    </button>
+  </div>
+  
+  <div class="p-4">
+    <div x-show="activeTab === 1">Tab 1 content</div>
+    <div x-show="activeTab === 2">Tab 2 content</div>
+  </div>
+</div>
+```
+
+### Smooth Scroll Animations
+
+Animate on scroll:
+
+```html
+<div
+  x-data="{ visible: false }"
+  x-intersect.once="visible = true"
+  x-transition:enter="transition ease-out duration-700"
+  x-transition:enter-start="opacity-0 transform translate-y-8"
+  x-transition:enter-end="opacity-100 transform translate-y-0"
+  x-show="visible"
+>
+  <p>Fades in from bottom when scrolled into view.</p>
+</div>
+```
+
+## Alpine Directives Reference
+
+### Core Directives
+
+- `x-data` - Declare component data
+- `x-init` - Run code when component initializes
+- `x-show` - Toggle visibility (display)
+- `x-if` - Conditional rendering (DOM)
+- `x-for` - Loop over data
+- `x-on` / `@` - Event listeners
+- `x-bind` / `:` - Bind attributes
+- `x-model` - Two-way data binding
+- `x-text` - Set text content
+- `x-html` - Set HTML content
+- `x-ref` - Reference elements
+- `x-cloak` - Hide until Alpine loads
+- `x-transition` - Transition utilities
+
+### Modifiers
+
+- `.prevent` - preventDefault()
+- `.stop` - stopPropagation()
+- `.outside` - Trigger when clicking outside
+- `.window` - Listen on window
+- `.once` - Only trigger once
+- `.debounce` - Debounce input
+- `.throttle` - Throttle events
+
+## Best Practices
+
+### Keep Components Small
+
+Break complex interactions into smaller components:
+
+```html
+<!-- Good -->
+<div x-data="{ open: false }">
+  <!-- Simple, focused component -->
+</div>
+
+<!-- Avoid -->
+<div x-data="{ 
+  menu1: false, 
+  menu2: false, 
+  modal: false,
+  tab: 1,
+  counter: 0
+  /* Too much state in one component */
+}">
+</div>
+```
+
+### Use Descriptive State Names
+
+```html
+<!-- Good -->
+<div x-data="{ isMenuOpen: false, selectedTab: 1 }">
+
+<!-- Avoid -->
+<div x-data="{ x: false, y: 1 }">
+```
+
+### Leverage Magic Properties
+
+Use Alpine's magic properties:
+
+```html
+<div x-data>
+  <button @click="$refs.content.scrollIntoView()">
+    Scroll to Content
+  </button>
+  <div x-ref="content">Content here</div>
+</div>
+```
+
+### Combine with Tailwind
+
+Dynamic Tailwind classes:
+
+```html
+<button
+  @click="active = !active"
+  :class="{ 
+    'bg-blue-500 text-white': active, 
+    'bg-gray-200 text-gray-700': !active 
+  }"
+>
+  Toggle
+</button>
+```
+
+## Debugging
+
+Alpine is available globally for debugging:
+
+```javascript
+// In browser console
+Alpine.version  // Check version
+$el            // Current element
+$data          // Component data
+$watch         // Watch data changes
+```
+
+## Performance Tips
+
+1. **Use `x-if` for expensive DOM** - Removes from DOM entirely
+2. **Use `x-show` for frequent toggles** - Only toggles display
+3. **Use `.once` modifier** - For one-time events
+4. **Debounce user input** - `.debounce.500ms`
+5. **Lazy load components** - Use `x-intersect` to initialize
+
+## Resources
+
+- [Alpine.js Documentation](https://alpinejs.dev)
+- [Alpine.js Plugins](https://alpinejs.dev/plugins/)
+- [Alpine.js Examples](https://alpinejs.dev/examples)
+- [Alpine.js GitHub](https://github.com/alpinejs/alpine)

@@ -1,0 +1,318 @@
+---
+title: Creating Custom Modules
+description: Learn how to create custom HubSpot modules for FreshJuice DEV theme
+icon: 'puzzle-piece'
+---
+
+Custom modules are the building blocks of your HubSpot pages. This guide walks you through creating a custom module from scratch.
+
+## Module Structure
+
+Every HubSpot module in FreshJuice DEV follows a consistent structure:
+
+```
+module-name.module/
+├── meta.json          # Module metadata and configuration
+├── fields.json        # Module fields definition
+├── module.html        # Module template (HubL)
+├── module.css         # Module-specific styles (optional)
+└── module.js          # Module-specific JavaScript (optional)
+```
+
+## Creating Your First Module
+
+<Steps>
+  <Step title="Create the module directory">
+    Navigate to `theme/modules/` and create a new directory with the `.module` extension:
+
+    ```bash
+    mkdir theme/modules/my-custom-module.module
+    cd theme/modules/my-custom-module.module
+    ```
+
+    The `.module` suffix is required for HubSpot to recognize it as a module.
+  </Step>
+
+  <Step title="Create meta.json">
+    Define the module metadata. This file controls where and how your module appears in the HubSpot editor.
+
+    ```json theme/modules/my-custom-module.module/meta.json
+    {
+      "global": false,
+      "content_types": [
+        "LANDING_PAGE",
+        "SITE_PAGE",
+        "BLOG_LISTING",
+        "BLOG_POST"
+      ],
+      "host_template_types": [
+        "PAGE",
+        "BLOG_LISTING",
+        "BLOG_POST"
+      ],
+      "label": "My Custom Module",
+      "is_available_for_new_content": true
+    }
+    ```
+
+    **Key properties:**
+    - `global`: Set to `true` if the module should be available globally across all pages
+    - `content_types`: Array of content types where this module can be used
+    - `label`: Display name in the HubSpot editor
+    - `icon`: Optional FontAwesome icon (e.g., `"fontawesome-5.14.0:Folder"`)
+  </Step>
+
+  <Step title="Define module fields">
+    Create `fields.json` to define the editable fields for your module:
+
+    ```json theme/modules/my-custom-module.module/fields.json
+    [
+      {
+        "id": "title",
+        "name": "title",
+        "label": "Title",
+        "required": true,
+        "locked": false,
+        "type": "text",
+        "default": "My Custom Module"
+      },
+      {
+        "id": "description",
+        "name": "description",
+        "label": "Description",
+        "required": false,
+        "locked": false,
+        "type": "richtext",
+        "default": "<p>Add your description here</p>"
+      }
+    ]
+    ```
+
+    **Common field types:**
+    - `text`: Single-line text input
+    - `richtext`: Rich text editor with formatting
+    - `image`: Image picker
+    - `group`: Repeater group for multiple items
+    - `boolean`: Checkbox
+    - `choice`: Dropdown or radio buttons
+    - `color`: Color picker
+    - `url`: URL input
+  </Step>
+
+  <Step title="Create the module template">
+    Create `module.html` with HubL template code. FreshJuice DEV uses Tailwind CSS and Alpine.js:
+
+    ```html theme/modules/my-custom-module.module/module.html
+    <div class="container mx-auto px-4 py-8">
+      {% if module.title %}
+        <h2 class="text-3xl font-bold mb-4">
+          {{ module.title }}
+        </h2>
+      {% endif %}
+
+      {% if module.description %}
+        <div class="prose max-w-full">
+          {{ module.description }}
+        </div>
+      {% endif %}
+    </div>
+    ```
+
+    **Template tips:**
+    - Access field values using `module.field_name`
+    - Use conditional statements to handle optional fields
+    - Apply Tailwind classes directly in your HTML
+    - Use HubL syntax for loops and conditionals
+  </Step>
+
+  <Step title="Add custom styles (optional)">
+    If you need module-specific CSS, create `module.css`:
+
+    ```css theme/modules/my-custom-module.module/module.css
+    /* Custom styles for this module */
+    .my-custom-class {
+      /* Your styles here */
+    }
+    ```
+
+    <Note>
+      Most styling should be done with Tailwind CSS classes. Only use custom CSS for truly unique styles not available in Tailwind.
+    </Note>
+  </Step>
+
+  <Step title="Add JavaScript functionality (optional)">
+    For interactive features, create `module.js`:
+
+    ```javascript theme/modules/my-custom-module.module/module.js
+    // Module-specific JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+      // Your code here
+    });
+    ```
+
+    <Note>
+      FreshJuice DEV includes Alpine.js by default. Use Alpine.js for most interactivity instead of vanilla JavaScript.
+    </Note>
+  </Step>
+</Steps>
+
+## Real Example: Stats Module
+
+Here's how the Stats Simple module is structured in FreshJuice DEV:
+
+### Module Template (module.html)
+
+```html theme/modules/stats-simple.module/module.html
+{% if module.stats_list | length == 2 %}
+  {% set grid_col_class = 'lg:grid-cols-2' %}
+{% endif %}
+
+{% if module.stats_list | length == 3 %}
+  {% set grid_col_class = 'lg:grid-cols-3' %}
+{% endif %}
+
+{% if module.stats_list | length >= 4 %}
+  {% set grid_col_class = 'lg:grid-cols-4' %}
+{% endif %}
+
+<div class="not-prose container place-items-center grid grid-cols-1 gap-6 {{ grid_col_class }}">
+  {% for item in module.stats_list %}
+    <div class="grid gap-2 text-center">
+      <p class="text-3xl font-semibold tracking-tight">{{ item.stats_title }}</p>
+      <p class="text-sm">{{ item.subtext }}</p>
+    </div>
+  {% endfor %}
+</div>
+```
+
+This example shows:
+- Dynamic grid columns based on the number of items
+- HubL loops to iterate through repeating fields
+- Tailwind classes for responsive layout
+- Clean, semantic HTML structure
+
+## Using Repeater Groups
+
+For modules with multiple items (like tabs, testimonials, or stats), use repeater groups:
+
+```json
+{
+  "id": "items",
+  "name": "items",
+  "label": "Items",
+  "type": "group",
+  "occurrence": {
+    "min": 1,
+    "max": null,
+    "default": 3
+  },
+  "children": [
+    {
+      "id": "item_title",
+      "name": "item_title",
+      "label": "Item Title",
+      "type": "text",
+      "default": "Item Title"
+    }
+  ]
+}
+```
+
+Then loop through them in your template:
+
+```html
+{% for item in module.items %}
+  <div>{{ item.item_title }}</div>
+{% endfor %}
+```
+
+## Adding Alpine.js Interactivity
+
+FreshJuice DEV includes Alpine.js for interactive components. Here's an example from the Tabs module:
+
+```html
+<div
+  x-data="{
+     selectedId: null,
+     init() { this.$nextTick(() => this.select(this.$id('tab', 1))) },
+     select(id) { this.selectedId = id },
+     isSelected(id) { return this.selectedId === id }
+  }"
+  x-id="['tab']">
+  
+  <button
+    :id="$id('tab', 1)"
+    @click="select($el.id)"
+    :class="isSelected($el.id) ? 'active' : ''"
+    type="button">
+    Tab 1
+  </button>
+</div>
+```
+
+## Testing Your Module
+
+<Steps>
+  <Step title="Upload to HubSpot">
+    Use the HubSpot CLI to upload your module:
+
+    ```bash
+    hs upload theme/modules/my-custom-module.module my-custom-module.module
+    ```
+  </Step>
+
+  <Step title="Add to a page">
+    1. Go to Marketing > Website > Website Pages
+    2. Create or edit a page
+    3. In the page editor, click the + button to add a module
+    4. Find your module under "Custom Modules"
+    5. Drag it onto the page
+  </Step>
+
+  <Step title="Test functionality">
+    - Test all field inputs in the module editor
+    - Preview the page in different viewports
+    - Check browser console for JavaScript errors
+    - Validate with different content lengths
+  </Step>
+</Steps>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Use Semantic HTML" icon="code">
+    Use appropriate HTML elements (`<article>`, `<section>`, `<nav>`) for better accessibility and SEO.
+  </Card>
+
+  <Card title="Mobile-First Design" icon="mobile">
+    Apply responsive classes (`sm:`, `md:`, `lg:`) to ensure your module looks great on all devices.
+  </Card>
+
+  <Card title="Modular CSS" icon="palette">
+    Prefer Tailwind utility classes over custom CSS. Only add custom CSS when absolutely necessary.
+  </Card>
+
+  <Card title="Performance" icon="gauge-high">
+    Keep JavaScript minimal. Use Alpine.js for interactivity instead of heavy frameworks.
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Styling Components" icon="paintbrush" href="/guides/styling-components">
+    Learn how to style your modules with Tailwind CSS
+  </Card>
+
+  <Card title="Adding JavaScript" icon="js" href="/guides/adding-javascript">
+    Add interactive functionality with Alpine.js
+  </Card>
+
+  <Card title="Theme Fields" icon="sliders" href="/guides/theme-fields">
+    Use global theme settings in your modules
+  </Card>
+
+  <Card title="Module Reference" icon="book" href="/modules/overview">
+    Browse all available modules
+  </Card>
+</CardGroup>

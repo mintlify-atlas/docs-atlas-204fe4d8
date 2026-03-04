@@ -1,0 +1,482 @@
+---
+title: Testimonial Modules
+description: Documentation for testimonial modules including simple centered, side-by-side, star rating, and large avatar layouts
+---
+
+Testimonial modules in FreshJuice DEV provide various layouts for displaying customer testimonials, reviews, and social proof on your website.
+
+## Available Testimonial Modules
+
+FreshJuice includes 4 testimonial modules with different visual styles:
+
+<CardGroup cols={2}>
+  <Card title="Simple Centered" icon="quote">
+    Clean, centered testimonial layout
+  </Card>
+  <Card title="Side by Side" icon="quote">
+    Testimonial with image alongside text
+  </Card>
+  <Card title="Star Rating" icon="star">
+    Testimonial with visual star ratings
+  </Card>
+  <Card title="Large Avatar" icon="user">
+    Prominent author image with testimonial
+  </Card>
+</CardGroup>
+
+## Module Details
+
+### Simple Centered Testimonial
+
+<AccordionGroup>
+  <Accordion title="Simple Centered Testimonial">
+    **Module:** `testimonials-simple-centered.module`
+    
+    **Label:** Simple Centered Testimonial
+    
+    **Purpose:** Display testimonials in a clean, centered layout with minimal distractions.
+    
+    **Design characteristics:**
+    - Centered text alignment
+    - Quote icon or marks
+    - Customer name and title
+    - Company/organization name
+    - Minimalist design
+    
+    **Best for:**
+    - Single testimonial highlights
+    - Hero sections
+    - Landing pages
+    - Feature pages
+    
+    **Available for:** Landing pages, site pages, blog listings, blog posts
+    
+    **Example use case:**
+    ```hubl
+    {% dnd_module "centered_testimonial"
+      path="../modules/testimonials-simple-centered.module",
+      label="Customer Testimonial"
+    %}
+    {% end_dnd_module %}
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Side by Side Testimonial
+
+<AccordionGroup>
+  <Accordion title="Side by Side Testimonial">
+    **Module:** `testimonials-side-by-side.module`
+    
+    **Label:** Side by Side Testimonial
+    
+    **Purpose:** Display testimonial text alongside a customer image or logo.
+    
+    **Design characteristics:**
+    - Two-column layout
+    - Image on one side, text on the other
+    - Responsive (stacks on mobile)
+    - Equal visual weight
+    
+    **Best for:**
+    - Customer stories
+    - Case study highlights
+    - B2B testimonials
+    - Product pages
+    
+    **Available for:** Landing pages, site pages, blog listings, blog posts
+    
+    **Layout options:**
+    - Image left, text right
+    - Text left, image right
+    
+    **Example use case:**
+    ```hubl
+    {% dnd_module "side_by_side_testimonial"
+      path="../modules/testimonials-side-by-side.module",
+      label="Customer Story"
+    %}
+    {% end_dnd_module %}
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Star Rating Testimonial
+
+<AccordionGroup>
+  <Accordion title="Star Rating Testimonial">
+    **Module:** `testimonials-with-star-rating.module`
+    
+    **Label:** Star Rating Testimonial
+    
+    **Purpose:** Display testimonials with visual star ratings for reviews and feedback.
+    
+    **Design characteristics:**
+    - Visual star rating (1-5 stars)
+    - Testimonial quote
+    - Customer name and details
+    - Review-style layout
+    
+    **Best for:**
+    - Product reviews
+    - Service ratings
+    - E-commerce sites
+    - Review aggregation
+    
+    **Available for:** Landing pages, site pages, blog listings, blog posts
+    
+    **Features:**
+    - Configurable star count
+    - Optional half-stars
+    - Rating number display
+    - Review date
+    
+    **Example use case:**
+    ```hubl
+    {% dnd_module "star_testimonial"
+      path="../modules/testimonials-with-star-rating.module",
+      label="Customer Review"
+    %}
+    {% end_dnd_module %}
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Large Avatar Testimonial
+
+<AccordionGroup>
+  <Accordion title="Large Avatar Testimonial">
+    **Module:** `testimonials-with-large-avatar.module`
+    
+    **Label:** Large Avatar Testimonial
+    
+    **Purpose:** Emphasize the person giving the testimonial with a large, prominent avatar image.
+    
+    **Design characteristics:**
+    - Large circular or square avatar
+    - Prominent customer photo
+    - Name and title below avatar
+    - Quote centered below image
+    
+    **Best for:**
+    - Personal testimonials
+    - Expert endorsements
+    - Influencer quotes
+    - Team member feedback
+    
+    **Available for:** Landing pages, site pages, blog listings, blog posts
+    
+    **Visual hierarchy:**
+    1. Large avatar image
+    2. Testimonial quote
+    3. Customer name
+    4. Customer title/company
+    
+    **Example use case:**
+    ```hubl
+    {% dnd_module "avatar_testimonial"
+      path="../modules/testimonials-with-large-avatar.module",
+      label="Expert Testimonial"
+    %}
+    {% end_dnd_module %}
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Module Comparison
+
+| Module | Layout | Best For | Visual Focus |
+|--------|--------|----------|---------------|
+| Simple Centered | Centered | Landing pages, hero sections | Quote text |
+| Side by Side | Two-column | Case studies, customer stories | Image + text balance |
+| Star Rating | Review-style | Product reviews, ratings | Star rating |
+| Large Avatar | Avatar-first | Personal testimonials, experts | Customer photo |
+
+## Usage Examples
+
+### Single Testimonial on Landing Page
+
+```hubl
+{% dnd_area "testimonial_section" %}
+  {% dnd_module "hero_testimonial"
+    path="../modules/testimonials-simple-centered.module",
+    label="Hero Testimonial"
+  %}
+  {% end_dnd_module %}
+{% end_dnd_area %}
+```
+
+### Multiple Testimonials in Grid
+
+```hubl
+{% dnd_area "testimonials" %}
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    {% dnd_module "testimonial_1"
+      path="../modules/testimonials-with-star-rating.module",
+      label="Testimonial 1"
+    %}
+    {% end_dnd_module %}
+    
+    {% dnd_module "testimonial_2"
+      path="../modules/testimonials-with-star-rating.module",
+      label="Testimonial 2"
+    %}
+    {% end_dnd_module %}
+    
+    {% dnd_module "testimonial_3"
+      path="../modules/testimonials-with-star-rating.module",
+      label="Testimonial 3"
+    %}
+    {% end_dnd_module %}
+  </div>
+{% end_dnd_area %}
+```
+
+### Alternating Side-by-Side Testimonials
+
+```hubl
+{% dnd_area "customer_stories" %}
+  {# First testimonial - image left #}
+  {% dnd_module "story_1"
+    path="../modules/testimonials-side-by-side.module",
+    label="Customer Story 1",
+    image_position="left"
+  %}
+  {% end_dnd_module %}
+  
+  {# Second testimonial - image right #}
+  {% dnd_module "story_2"
+    path="../modules/testimonials-side-by-side.module",
+    label="Customer Story 2",
+    image_position="right"
+  %}
+  {% end_dnd_module %}
+{% end_dnd_area %}
+```
+
+## Styling Testimonials
+
+### Custom Styling with Tailwind
+
+```html
+<!-- module.html -->
+<div class="testimonial bg-white rounded-lg shadow-lg p-8">
+  <div class="quote-icon text-4xl text-primary mb-4">
+    <i class="fas fa-quote-left"></i>
+  </div>
+  
+  <blockquote class="text-lg text-gray-700 mb-6">
+    {{ module.quote }}
+  </blockquote>
+  
+  <div class="author flex items-center">
+    {% if module.avatar %}
+      <img src="{{ module.avatar }}" alt="{{ module.author_name }}" class="w-12 h-12 rounded-full mr-4">
+    {% endif %}
+    <div>
+      <div class="font-bold">{{ module.author_name }}</div>
+      <div class="text-sm text-gray-600">{{ module.author_title }}</div>
+    </div>
+  </div>
+</div>
+```
+
+### Star Rating Implementation
+
+```html
+<!-- Star rating display -->
+<div class="stars flex items-center mb-4">
+  {% for i in range(1, 6) %}
+    {% if i <= module.rating %}
+      <i class="fas fa-star text-yellow-400"></i>
+    {% else %}
+      <i class="far fa-star text-gray-300"></i>
+    {% endif %}
+  {% endfor %}
+  <span class="ml-2 text-sm text-gray-600">({{ module.rating }}/5)</span>
+</div>
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use real testimonials">
+    Always use genuine customer testimonials with real names and photos. Authenticity builds trust.
+  </Accordion>
+  
+  <Accordion title="Include customer details">
+    Add the customer's name, title, and company for credibility. Photos increase authenticity.
+  </Accordion>
+  
+  <Accordion title="Keep quotes concise">
+    Aim for 2-3 sentences. Longer testimonials lose impact. Highlight specific benefits.
+  </Accordion>
+  
+  <Accordion title="Choose the right layout">
+    Match the module style to your page design. Use centered for hero sections, side-by-side for stories.
+  </Accordion>
+  
+  <Accordion title="Optimize images">
+    Use high-quality customer photos. Ensure proper image dimensions for each module type.
+  </Accordion>
+  
+  <Accordion title="Add social proof indicators">
+    Include company logos, job titles, or verification badges to increase credibility.
+  </Accordion>
+  
+  <Accordion title="Display multiple testimonials">
+    Show 3-6 testimonials to build trust. Use a grid or carousel for multiple testimonials.
+  </Accordion>
+</AccordionGroup>
+
+## Common Field Configuration
+
+All testimonial modules typically include these fields:
+
+```json
+[
+  {
+    "id": "quote",
+    "name": "quote",
+    "label": "Testimonial Quote",
+    "type": "richtext",
+    "default": ""
+  },
+  {
+    "id": "author_name",
+    "name": "author_name",
+    "label": "Customer Name",
+    "type": "text",
+    "default": ""
+  },
+  {
+    "id": "author_title",
+    "name": "author_title",
+    "label": "Customer Title",
+    "type": "text",
+    "default": ""
+  },
+  {
+    "id": "author_company",
+    "name": "author_company",
+    "label": "Company Name",
+    "type": "text",
+    "default": ""
+  },
+  {
+    "id": "avatar",
+    "name": "avatar",
+    "label": "Customer Photo",
+    "type": "image",
+    "default": {
+      "src": "",
+      "alt": ""
+    }
+  }
+]
+```
+
+### Star Rating Module Fields
+
+```json
+[
+  {
+    "id": "rating",
+    "name": "rating",
+    "label": "Star Rating",
+    "type": "number",
+    "min": 1,
+    "max": 5,
+    "step": 0.5,
+    "default": 5
+  }
+]
+```
+
+## Accessibility Considerations
+
+<Note>
+  **Accessibility:** Ensure testimonials are accessible by using proper semantic HTML and ARIA attributes.
+</Note>
+
+```html
+<figure class="testimonial" role="group" aria-label="Customer testimonial">
+  <blockquote cite="[source-url]">
+    <p>{{ module.quote }}</p>
+  </blockquote>
+  <figcaption>
+    <cite>{{ module.author_name }}</cite>, {{ module.author_title }}
+  </figcaption>
+</figure>
+```
+
+### Screen Reader Support
+
+```html
+<!-- Star rating with screen reader support -->
+<div class="stars" role="img" aria-label="{{ module.rating }} out of 5 stars">
+  <!-- Star icons -->
+</div>
+```
+
+## Testimonial Carousel
+
+For displaying multiple testimonials in a rotating carousel:
+
+```html
+<!-- Using Alpine.js for carousel -->
+<div x-data="{ active: 0, testimonials: 3 }" class="testimonial-carousel">
+  <div class="testimonials-container">
+    <!-- Testimonial modules here -->
+  </div>
+  
+  <div class="controls">
+    <button @click="active = (active - 1 + testimonials) % testimonials">Previous</button>
+    <button @click="active = (active + 1) % testimonials">Next</button>
+  </div>
+</div>
+```
+
+## Schema Markup for SEO
+
+Add structured data for better SEO:
+
+```html
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Review",
+  "itemReviewed": {
+    "@type": "Organization",
+    "name": "Your Company Name"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "{{ module.author_name }}"
+  },
+  "reviewBody": "{{ module.quote }}",
+  "reviewRating": {
+    "@type": "Rating",
+    "ratingValue": "{{ module.rating }}",
+    "bestRating": "5"
+  }
+}
+</script>
+```
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Content Modules" icon="cube" href="/modules/content-modules">
+    Explore other content modules
+  </Card>
+  <Card title="Creating Modules" icon="code" href="/guides/creating-modules">
+    Build custom testimonial modules
+  </Card>
+  <Card title="Styling Components" icon="palette" href="/guides/styling-components">
+    Learn about Tailwind CSS styling
+  </Card>
+  <Card title="Alpine.js" icon="code" href="/development/alpine-js">
+    Add interactivity with Alpine.js
+  </Card>
+</CardGroup>

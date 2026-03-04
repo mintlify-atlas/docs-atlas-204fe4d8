@@ -1,0 +1,219 @@
+---
+title: Project Structure
+description: Understanding the FreshJuice DEV directory organization and file layout
+---
+
+The FreshJuice DEV theme follows a clear separation between source files and compiled theme files, making development and deployment straightforward.
+
+## Directory Overview
+
+The project is organized into three main directories:
+
+<CardGroup cols={3}>
+  <Card title="source/" icon="code">
+    Source files for CSS, JavaScript, and images that get compiled during the build process
+  </Card>
+  <Card title="theme/" icon="palette">
+    Compiled HubSpot theme files including templates, modules, macros, and sections
+  </Card>
+  <Card title="scripts/" icon="terminal">
+    Build automation scripts for versioning and packaging
+  </Card>
+</CardGroup>
+
+## Source Directory
+
+The `source/` directory contains all pre-compiled assets that are processed by the build pipeline:
+
+```plaintext
+source/
+├── css/                  # Source CSS files (Tailwind CSS)
+│   ├── base/            # Base styles (reset, typography, forms, buttons)
+│   ├── components/      # Component-specific styles
+│   ├── utilities/       # Utility classes
+│   └── tailwind.css     # Main Tailwind entry point
+├── images/              # Source images and assets
+└── js/                  # Source JavaScript files
+    ├── modules/         # JavaScript modules and utilities
+    └── main.js          # Main JavaScript entry point
+```
+
+<Info>
+  The `source/` directory is where you'll spend most of your development time when working with CSS and JavaScript.
+</Info>
+
+### CSS Structure
+
+The CSS follows a modular architecture with Tailwind CSS at its core:
+
+<CodeGroup>
+```css source/css/tailwind.css
+@import "tailwindcss" source(none);
+
+@source "../../theme/**/*.html";
+@source "../../theme/**/*.js";
+@source "../js/farmerswife.js";
+@source "./**/*.css";
+
+@theme {
+  --color-cursor: #FFFFFF;
+  --color-terminal: #000000;
+  --font-cursive: "Caveat", cursive;
+}
+
+/* Base */
+@import "./base/reset.css";
+@import "./base/animations.css";
+@import "./base/typography.css";
+@import "./base/forms.css";
+@import "./base/buttons.css";
+
+/* Components */
+@import "./components/blog-comments.css";
+@import "./components/yt-lite.css";
+@import "./components/system.css";
+
+/* Utils */
+@import "./utilities/utils.css";
+```
+</CodeGroup>
+
+### JavaScript Structure
+
+The JavaScript is bundled using esbuild and includes Alpine.js and its plugins:
+
+<CodeGroup>
+```javascript source/js/main.js
+import debugLog from './modules/_debugLog';
+import loadScript from './modules/_loadScript';
+import flyingPages from "flying-pages-module";
+import Alpine from "alpinejs";
+import intersect from "@alpinejs/intersect";
+import collapse from "@alpinejs/collapse";
+import focus from "@alpinejs/focus";
+import dataDOM from "./modules/Alpine.data/DOM";
+
+window.Alpine = Alpine;
+
+// Add plugins to Alpine
+Alpine.plugin(intersect);
+Alpine.plugin(collapse);
+Alpine.plugin(focus);
+
+Alpine.data("xDOM", dataDOM);
+
+// Start Alpine when the page is ready
+domReady(() => {
+  Alpine.start();
+  flyingPages();
+});
+```
+</CodeGroup>
+
+## Theme Directory
+
+The `theme/` directory contains the compiled HubSpot CMS theme files:
+
+```plaintext
+theme/
+├── css/                  # Compiled CSS files
+├── images/               # Images and icons
+│   ├── icons/           # SVG icons
+│   ├── module-icons/    # Module preview icons
+│   ├── section-previews/# Section preview images
+│   └── template-previews/# Template preview images
+├── js/                   # Compiled JS and vendor scripts
+├── macros/               # HubL macros (reusable functions)
+├── modules/              # HubL modules (content components)
+├── sections/             # HubL sections (drag & drop layouts)
+└── templates/            # HubL templates
+    ├── layouts/         # Layout templates (base.html)
+    ├── partials/        # Partial templates (header, footer)
+    └── system/          # System templates (404, 500, etc.)
+```
+
+<Note>
+  Files in the `theme/` directory are uploaded to HubSpot and should not be edited directly during development. Use the build process to compile changes from `source/`.
+</Note>
+
+## Scripts Directory
+
+The `scripts/` directory contains shell scripts for build automation:
+
+```plaintext
+scripts/
+├── build-zip.sh                    # Create distribution ZIP file
+├── bump-theme-version.sh           # Update theme version number
+└── post-fetch.sh                   # Post-processing after HubSpot fetch
+```
+
+### Build Script Example
+
+<CodeGroup>
+```bash scripts/build-zip.sh
+#!/bin/sh
+
+VERSION=$(node -p "require('./package.json').version")
+
+mkdir -p ./_temp/FreshJuiceDEV ./_dist
+
+cp -r ./theme/* ./_temp/FreshJuiceDEV
+
+cd ./_temp
+
+zip -rm ../_dist/freshjuice-dev-hubspot-theme-v$VERSION-dev.zip ./FreshJuiceDEV -x "*/.DS_Store"
+```
+</CodeGroup>
+
+## Root Configuration Files
+
+Key configuration files in the project root:
+
+<AccordionGroup>
+  <Accordion title="package.json">
+    Defines npm scripts, dependencies, and project metadata. Contains build commands for Tailwind CSS, esbuild, and HubSpot CLI integration.
+  </Accordion>
+  
+  <Accordion title=".editorconfig">
+    Ensures consistent coding styles across different editors and IDEs.
+  </Accordion>
+  
+  <Accordion title=".nvmrc">
+    Specifies the Node.js version (v22.0.0+) required for the project.
+  </Accordion>
+  
+  <Accordion title=".gitignore">
+    Lists files and directories to exclude from version control, including `_temp/`, `_dist/`, and `node_modules/`.
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+<Warning>
+  **Never edit compiled files directly!** Always make changes in the `source/` directory and let the build process handle compilation.
+</Warning>
+
+<Steps>
+  <Step title="Organize by concern">
+    Keep CSS in `source/css/`, JavaScript in `source/js/`, and HubL templates in `theme/`
+  </Step>
+  
+  <Step title="Use the build process">
+    Run `npm run start` during development to watch for changes and auto-compile
+  </Step>
+  
+  <Step title="Version control">
+    Commit both `source/` and `theme/` directories to maintain a complete project history
+  </Step>
+</Steps>
+
+## Related Resources
+
+<CardGroup cols={2}>
+  <Card title="Theme Architecture" icon="diagram-project" href="/concepts/theme-architecture">
+    Learn how modules, templates, and macros work together
+  </Card>
+  <Card title="Build Process" icon="gears" href="/concepts/build-process">
+    Understand the compilation and deployment pipeline
+  </Card>
+</CardGroup>

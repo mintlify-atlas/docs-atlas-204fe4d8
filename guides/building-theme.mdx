@@ -1,0 +1,262 @@
+---
+title: Building the Theme
+description: Learn how to build FreshJuice DEV for production, including Tailwind CSS compilation, JavaScript bundling, and ZIP package creation.
+---
+
+Building FreshJuice DEV for production involves compiling assets, bundling JavaScript, and creating distributable packages. This guide walks through the complete build process.
+
+## Build Process Overview
+
+The production build consists of four main steps:
+
+1. Clean temporary and distribution directories
+2. Bundle JavaScript with esbuild
+3. Compile Tailwind CSS
+4. Create ZIP package for distribution
+
+## Quick Build
+
+<Steps>
+  <Step title="Run the build command">
+    Execute the complete build process:
+    
+    ```bash
+    npm run build
+    ```
+    
+    This runs all build steps sequentially:
+    ```bash
+    npm-run-all --serial clean build:js build:tailwind build:zip
+    ```
+  </Step>
+  
+  <Step title="Verify the output">
+    After building, check the generated files:
+    
+    - **Compiled theme**: `./theme/` directory
+    - **Distribution ZIP**: `./_dist/freshjuice-dev-hubspot-theme-v{VERSION}-dev.zip`
+  </Step>
+</Steps>
+
+## Step-by-Step Build Process
+
+### 1. Clean Build Directories
+
+<Steps>
+  <Step title="Remove old build artifacts">
+    Clear temporary and distribution folders:
+    
+    ```bash
+    npm run clean
+    ```
+    
+    This script:
+    ```bash
+    rimraf './_temp' './_dist' && mkdir './_temp' './_dist'
+    ```
+    
+    - Deletes `./_temp` and `./_dist` directories
+    - Recreates them as empty directories
+  </Step>
+</Steps>
+
+### 2. Build JavaScript
+
+<Steps>
+  <Step title="Bundle JavaScript with esbuild">
+    Compile and bundle all JavaScript files:
+    
+    ```bash
+    npm run build:js
+    ```
+    
+    This runs:
+    ```bash
+    npx esbuild ./source/js/main.js --outfile=./theme/js/main.js --bundle
+    ```
+  </Step>
+  
+  <Step title="What gets bundled">
+    The esbuild process:
+    - Takes `./source/js/main.js` as the entry point
+    - Bundles all imported dependencies (Alpine.js, plugins, etc.)
+    - Outputs to `./theme/js/main.js`
+    - Includes tree-shaking to remove unused code
+  </Step>
+</Steps>
+
+<Info>
+For development with auto-rebuild, use `npm run watch:js` instead.
+</Info>
+
+### 3. Compile Tailwind CSS
+
+<Steps>
+  <Step title="Build production CSS">
+    Compile Tailwind CSS with optimizations:
+    
+    ```bash
+    npm run build:tailwind
+    ```
+    
+    This runs:
+    ```bash
+    npx @tailwindcss/cli -i ./source/css/tailwind.css -o ./theme/css/tailwind.css
+    ```
+  </Step>
+  
+  <Step title="CSS optimization">
+    The Tailwind build:
+    - Scans all templates, modules, and sections for used classes
+    - Generates only the CSS needed (purges unused styles)
+    - Applies autoprefixer for browser compatibility
+    - Outputs optimized CSS to `./theme/css/tailwind.css`
+  </Step>
+</Steps>
+
+<Info>
+For development with auto-rebuild, use `npm run watch:tailwind` instead.
+</Info>
+
+### 4. Create Distribution ZIP
+
+<Steps>
+  <Step title="Package theme for distribution">
+    Create a ZIP file ready for marketplace or manual installation:
+    
+    ```bash
+    npm run build:zip
+    ```
+    
+    This executes `./scripts/build-zip.sh`:
+  </Step>
+  
+  <Step title="Understanding build-zip.sh">
+    The script performs these actions:
+    
+    ```bash
+    # Get version from package.json
+    VERSION=$(node -p "require('./package.json').version")
+    
+    # Create temporary directory
+    mkdir -p ./_temp/FreshJuiceDEV ./_dist
+    
+    # Copy theme files
+    cp -r ./theme/* ./_temp/FreshJuiceDEV
+    
+    # Create ZIP with version number
+    cd ./_temp
+    zip -rm ../_dist/freshjuice-dev-hubspot-theme-v$VERSION-dev.zip ./FreshJuiceDEV -x "*/.DS_Store"
+    ```
+  </Step>
+  
+  <Step title="Output location">
+    The ZIP file is created at:
+    
+    ```
+    ./_dist/freshjuice-dev-hubspot-theme-v{VERSION}-dev.zip
+    ```
+    
+    For example, version 3.0.0 creates:
+    ```
+    ./_dist/freshjuice-dev-hubspot-theme-v3.0.0-dev.zip
+    ```
+  </Step>
+</Steps>
+
+## Development vs Production
+
+### Development Workflow
+
+For active development, use watch mode:
+
+```bash
+npm start
+```
+
+This runs all watchers in parallel:
+- `watch:tailwind` - Recompiles CSS on changes
+- `watch:js` - Rebundles JavaScript on changes
+- `watch:hubspot` - Uploads changes to HubSpot automatically
+
+### Production Build Workflow
+
+<Steps>
+  <Step title="Bump version">
+    Update version numbers before building:
+    
+    ```bash
+    npm run version:patch
+    # or
+    npm run version:minor
+    # or
+    npm run version:major
+    ```
+  </Step>
+  
+  <Step title="Build for production">
+    Create optimized build:
+    
+    ```bash
+    npm run build
+    ```
+  </Step>
+  
+  <Step title="Upload to HubSpot">
+    Deploy the built theme:
+    
+    ```bash
+    npm run upload:hubspot
+    ```
+  </Step>
+</Steps>
+
+## Build Configuration
+
+### Tailwind CSS Configuration
+
+Tailwind scans these paths for class usage:
+- `./theme/templates/**/*.html`
+- `./theme/modules/**/*.html`
+- `./theme/sections/**/*.html`
+- `./theme/macros/**/*.html`
+
+### esbuild Configuration
+
+JavaScript bundling:
+- Entry: `./source/js/main.js`
+- Output: `./theme/js/main.js`
+- Mode: Bundle all imports
+- No minification (can be added with `--minify` flag)
+
+## Troubleshooting
+
+**Build fails during clean:**
+- Ensure you have write permissions in the project directory
+- Close any programs that might lock files in `_temp` or `_dist`
+
+**JavaScript bundle errors:**
+- Check for syntax errors in `./source/js/` files
+- Verify all imports resolve correctly
+- Run `npm install` to ensure dependencies are installed
+
+**Tailwind CSS not updating:**
+- Verify class names exist in your templates
+- Check that template files are in scanned directories
+- Clear the Tailwind cache: `rm -rf .cache`
+
+**ZIP creation fails:**
+- Ensure the `zip` command is available on your system
+- Check that `./theme/` directory contains files
+- Verify `package.json` has a valid version field
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="HubSpot CLI Guide" icon="cloud-arrow-up" href="/guides/hubspot-cli">
+    Upload and deploy your built theme to HubSpot
+  </Card>
+  <Card title="Version Management" icon="tag" href="/guides/version-management">
+    Learn how to manage theme versions
+  </Card>
+</CardGroup>

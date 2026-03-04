@@ -1,0 +1,231 @@
+---
+title: Modules Overview
+description: Complete overview of all 37 modules in FreshJuice DEV theme, their structure, and how to use them
+---
+
+FreshJuice DEV includes 37 pre-built modules that you can use to create rich, interactive content in HubSpot. These modules are organized into different categories based on their functionality.
+
+## Module Structure
+
+All modules in FreshJuice are located in:
+
+```
+source/theme/modules/
+├── accordion.module/
+├── button.module/
+├── card.module/
+├── ... (34 more modules)
+└── testimonials-with-star-rating.module/
+```
+
+## Module Categories
+
+Modules are organized into the following categories:
+
+<CardGroup cols={2}>
+  <Card title="Content Modules" icon="cube" href="/modules/content-modules">
+    UI components like accordions, cards, buttons, tabs, and lists
+  </Card>
+  <Card title="Navigation Modules" icon="compass" href="/modules/navigation-modules">
+    Navigation bars, menus, footers, and navigation components
+  </Card>
+  <Card title="Blog Modules" icon="blog" href="/modules/blog-modules">
+    Blog listing, pagination, related posts, and author information
+  </Card>
+  <Card title="Testimonial Modules" icon="quote" href="/modules/testimonials-modules">
+    Various testimonial layouts and styles
+  </Card>
+</CardGroup>
+
+## Module Breakdown
+
+FreshJuice includes **37 modules** across different categories:
+
+- **Content Modules:** 16 modules (accordion, button, card, tabs, lists, media, etc.)
+- **Navigation Modules:** 6 modules (navigation bars, menus, footers)
+- **Blog Modules:** 5 modules (blog listing, pagination, related posts)
+- **Testimonial Modules:** 4 modules (various testimonial layouts)
+- **Pricing Modules:** 3 modules (pricing cards and tables)
+- **Stats Modules:** 3 modules (statistics and timeline displays)
+
+## How Modules Work
+
+Modules in HubSpot are reusable components that can be added to templates and drag-and-drop areas.
+
+### Module Structure
+
+Each module directory contains:
+
+```
+module-name.module/
+├── module.html        # HubL template
+├── module.css         # Module styles
+├── module.js          # Module JavaScript (if needed)
+├── fields.json        # Module field definitions
+└── meta.json          # Module metadata
+```
+
+### Module Metadata (meta.json)
+
+The `meta.json` file defines module properties:
+
+```json
+{
+  "label": "Module Name",
+  "icon": "fontawesome-5.14.0:Icon:SOLID",
+  "global": false,
+  "content_types": ["LANDING_PAGE", "SITE_PAGE", "BLOG_POST"],
+  "host_template_types": ["PAGE", "BLOG_POST"],
+  "is_available_for_new_content": true
+}
+```
+
+### Module Types
+
+#### Standard Modules
+
+Most modules are standard modules that can be added to drag-and-drop areas:
+
+```hubl
+{% dnd_module "accordion"
+  path="../modules/accordion.module",
+  label="Accordion"
+%}
+{% end_dnd_module %}
+```
+
+#### Global Modules
+
+Some modules are marked as `global: true` in their meta.json. These include:
+
+- **Global Footer** - Site-wide footer
+- **Global Footer for Landing Pages** - Simplified footer for landing pages
+- **Post Author** - Blog post author information
+- **Scroll to Top** - Scroll to top button
+- **Share Buttons** - Social sharing buttons for blog posts
+
+Global modules are typically included in templates using:
+
+```hubl
+{% global_partial path="../partials/footer.html" %}
+```
+
+## Using Modules
+
+### In Templates
+
+Modules can be added directly to templates:
+
+```hubl
+{% module "navigation"
+  path="../modules/navigation-bar.module",
+  label="Navigation Bar"
+%}
+```
+
+### In Drag-and-Drop Areas
+
+Modules are available in the HubSpot page editor for drag-and-drop areas:
+
+```hubl
+{% dnd_area "main_content" %}
+  {% dnd_module "card"
+    path="../modules/card.module"
+  %}
+  {% end_dnd_module %}
+{% end_dnd_area %}
+```
+
+### Module Availability
+
+Modules can be restricted to specific content types:
+
+- **LANDING_PAGE** - Available for landing pages
+- **SITE_PAGE** - Available for site pages
+- **BLOG_POST** - Available for blog posts
+- **BLOG_LISTING** - Available for blog listing pages
+
+## Module Development
+
+<Note>
+  For information on creating custom modules, see the [Creating Modules](/guides/creating-modules) guide.
+</Note>
+
+### Module Fields
+
+Modules use `fields.json` to define editable fields:
+
+```json
+[
+  {
+    "id": "heading",
+    "name": "heading",
+    "label": "Heading",
+    "type": "text",
+    "default": "Default heading"
+  }
+]
+```
+
+### Module Styling
+
+Modules can include Tailwind CSS classes and custom CSS:
+
+```html
+<!-- module.html -->
+<div class="container mx-auto px-4">
+  <h2 class="text-2xl font-bold">{{ module.heading }}</h2>
+</div>
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use semantic module names">
+    Choose descriptive names that clearly indicate the module's purpose (e.g., `navigation-bar` instead of `nav`).
+  </Accordion>
+  
+  <Accordion title="Keep modules focused">
+    Each module should have a single, clear purpose. Avoid creating overly complex modules that try to do too much.
+  </Accordion>
+  
+  <Accordion title="Make modules configurable">
+    Use fields to make modules flexible and reusable across different contexts.
+  </Accordion>
+  
+  <Accordion title="Follow naming conventions">
+    Use kebab-case for module directory names (e.g., `blog-listing.module`).
+  </Accordion>
+  
+  <Accordion title="Test across content types">
+    Ensure modules work correctly in all supported content types (pages, blog posts, etc.).
+  </Accordion>
+</AccordionGroup>
+
+## Module Performance
+
+FreshJuice modules are optimized for performance:
+
+- **Lazy loading** for videos (Lite YouTube, Lite Vimeo)
+- **Minimal JavaScript** - modules use Alpine.js for lightweight interactivity
+- **CSS optimization** - Tailwind CSS with PurgeCSS removes unused styles
+- **Modern techniques** - uses performance-focused libraries and patterns
+
+## Next Steps
+
+Explore specific module categories:
+
+<CardGroup cols={2}>
+  <Card title="Content Modules" icon="cube" href="/modules/content-modules">
+    Accordion, Button, Card, Tabs, Lists, and more
+  </Card>
+  <Card title="Navigation Modules" icon="compass" href="/modules/navigation-modules">
+    Navigation bars, menus, and footers
+  </Card>
+  <Card title="Blog Modules" icon="blog" href="/modules/blog-modules">
+    Blog listing, pagination, and related posts
+  </Card>
+  <Card title="Testimonial Modules" icon="quote" href="/modules/testimonials-modules">
+    Various testimonial layouts and styles
+  </Card>
+</CardGroup>

@@ -1,0 +1,223 @@
+---
+title: "loadScript"
+description: "Dynamic script loader utility for FreshJuice DEV theme"
+---
+
+## Overview
+
+The `loadScript` function dynamically loads external JavaScript files into the HTML document. It provides control over loading strategies (defer/async), prevents duplicate script loading, and supports callbacks for post-load execution.
+
+## Location
+
+```
+source/js/modules/_loadScript.js
+```
+
+## Function Signature
+
+```javascript
+loadScript(src, loading = "defer", callback, callbackForced = false)
+```
+
+## Parameters
+
+<ParamField path="src" type="string" required>
+  The URL of the script to load. Can be:
+  - Full URL with protocol: `https://example.com/script.js`
+  - Protocol-relative URL: `//example.com/script.js`
+  - Domain-only URL: `example.com/script.js` (auto-prepended with `https://`)
+</ParamField>
+
+<ParamField path="loading" type="string" default="defer">
+  The loading strategy for the script:
+  - `"defer"` - Script executes after HTML parsing completes
+  - `"async"` - Script executes as soon as it's available
+</ParamField>
+
+<ParamField path="callback" type="function">
+  Optional callback function to execute when the script finishes loading.
+</ParamField>
+
+<ParamField path="callbackForced" type="boolean" default="false">
+  If `true`, executes the callback even when the script is already loaded (skipped duplicate).
+</ParamField>
+
+## Returns
+
+**Type:** `void`
+
+This function does not return any value.
+
+## Implementation Details
+
+### URL Normalization
+
+The function automatically normalizes URLs to use HTTPS:
+
+```javascript
+if (!src.startsWith("http") && !src.startsWith("https")) {
+  src = (src.startsWith("//")) ? `https:${src}` : `https://${src}`;
+}
+```
+
+### Duplicate Prevention
+
+Before loading, the function checks if a script with the same source already exists:
+
+```javascript
+if (document.querySelector(`script[src="${src}"]`)) {
+  if (callback && callbackForced) callback();
+  return;
+}
+```
+
+### Script Element Creation
+
+The function creates a script element with appropriate attributes:
+
+```javascript
+const script = document.createElement("script");
+script.src = src;
+script.crossOrigin = "anonymous";
+
+if (loading === "defer") script.defer = true;
+if (loading === "async") script.async = true;
+```
+
+## Usage Examples
+
+### Basic Script Loading (Deferred)
+
+```javascript
+import loadScript from './modules/_loadScript';
+
+// Load with default defer strategy
+loadScript('https://cdn.example.com/library.js');
+```
+
+### Async Loading with Callback
+
+```javascript
+loadScript(
+  'https://cdn.example.com/maps.js',
+  'async',
+  () => {
+    console.log('Maps library loaded!');
+    initializeMap();
+  }
+);
+```
+
+### Protocol-Relative URL
+
+```javascript
+// Automatically converts to https://
+loadScript('//cdn.jsdelivr.net/npm/library@1.0.0/dist/lib.min.js');
+```
+
+### Real-World Example (from main.js)
+
+Loading balance-text for Safari browsers:
+
+```javascript
+if (navigator.userAgent.indexOf('Safari') != -1 && 
+    navigator.userAgent.indexOf('Chrome') == -1) {
+  loadScript(
+    '//cdn.jsdelivr.net/npm/balance-text@3.3.1/balancetext.min.js',
+    'async',
+    () => {
+      balanceText(document.querySelectorAll('[x-balance-text]'), {watch: true});
+    }
+  );
+}
+```
+
+### Using in Alpine.data Components
+
+The loadScript function is available in the xDOM component:
+
+```html
+<div x-data="xDOM">
+  <button @click="loadScript('https://example.com/widget.js', 'async', () => alert('Loaded!'))">
+    Load Widget
+  </button>
+</div>
+```
+
+## Loading Strategies
+
+### Defer vs Async
+
+<CodeGroup>
+
+```javascript defer
+// Defer: Executes after HTML parsing, maintains order
+loadScript('script1.js', 'defer');
+loadScript('script2.js', 'defer');
+// script1.js will execute before script2.js
+```
+
+```javascript async
+// Async: Executes as soon as available, order not guaranteed
+loadScript('script1.js', 'async');
+loadScript('script2.js', 'async');
+// Order of execution depends on download speed
+```
+
+</CodeGroup>
+
+## Callback Behavior
+
+### Standard Callback
+
+Callback executes only when the script is freshly loaded:
+
+```javascript
+loadScript('lib.js', 'defer', () => {
+  console.log('Script loaded for the first time');
+});
+
+// Second call - callback won't execute
+loadScript('lib.js', 'defer', () => {
+  console.log('This will NOT run');
+});
+```
+
+### Forced Callback
+
+Callback executes even if script was already loaded:
+
+```javascript
+loadScript('lib.js', 'defer', () => {
+  console.log('First load');
+});
+
+// Second call - callback WILL execute
+loadScript('lib.js', 'defer', () => {
+  console.log('This WILL run even though script exists');
+}, true); // callbackForced = true
+```
+
+## Best Practices
+
+<Note>
+- Use `defer` for scripts that depend on DOM content
+- Use `async` for independent scripts (analytics, ads)
+- Always provide callbacks for scripts that require initialization
+- Use protocol-relative URLs (`//`) to match the page protocol
+</Note>
+
+<Warning>
+- Callbacks may not fire if script loading fails
+- Multiple calls with same URL won't reload the script
+- Set `callbackForced=true` if you need callback execution on duplicate loads
+</Warning>
+
+## Security
+
+All dynamically loaded scripts include the `crossOrigin="anonymous"` attribute for CORS compliance.
+
+## Related
+
+- [main.js](/api/js/main) - Uses loadScript for conditional script loading
+- [Alpine.data (xDOM)](/api/js/alpine-data) - Exposes loadScript in Alpine components

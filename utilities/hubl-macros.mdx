@@ -1,0 +1,216 @@
+---
+title: 'HubL Macros'
+description: 'Reusable HubL macros for common template operations'
+icon: 'brackets-curly'
+---
+
+## Overview
+
+The FreshJuice theme includes a collection of reusable HubL macros that provide common functionality for template development. These macros are located in the `theme/macros/` directory and can be imported into any template file.
+
+## Available Macros
+
+### slugify
+
+Converts a string into a URL-friendly slug by removing special characters, converting to lowercase, and replacing spaces with hyphens.
+
+**Location:** `theme/macros/slugify.html`
+
+#### Parameters
+
+- `text` (required): String to convert into a slug
+
+#### Usage
+
+```jinja
+{# Import the macro #}
+{% from 'theme/macros/slugify.html' import slugify %}
+
+{# Use the macro #}
+{{ slugify('Give me slug') }}
+{# Output: give-me-slug #}
+
+{# Example with special characters #}
+{{ slugify('Hello World! This is a Test.') }}
+{# Output: hello-world-this-is-a-test #}
+```
+
+#### Implementation Details
+
+The macro performs the following transformations:
+1. Converts text to lowercase and strips HTML tags
+2. Replaces spaces and whitespace characters with hyphens
+3. Removes all non-alphanumeric characters (except hyphens and underscores)
+4. Replaces multiple consecutive hyphens with a single hyphen
+5. Trims hyphens from the start and end of the string
+
+---
+
+### unique_id
+
+Generates a unique identifier by combining multiple random integers. Useful for creating unique IDs for HTML elements.
+
+**Location:** `theme/macros/unique-id.html`
+
+#### Parameters
+
+None
+
+#### Usage
+
+```jinja
+{# Import the macro #}
+{% from 'theme/macros/unique-id.html' import unique_id %}
+
+{# Generate a unique ID #}
+<div id="element_{{ unique_id() }}">
+  Content here
+</div>
+{# Output: <div id="element_123456_789012_345678_901234_567890"> #}
+
+{# Use for modal IDs #}
+{% set modal_id = unique_id() %}
+<button data-target="modal_{{ modal_id }}">Open Modal</button>
+<div id="modal_{{ modal_id }}" class="modal">
+  Modal content
+</div>
+```
+
+#### Implementation Details
+
+The macro generates five random 6-digit numbers and joins them with underscores to create a unique identifier.
+
+---
+
+### minutes_to_read
+
+Calculates the estimated reading time for blog post content based on an average reading speed of 300 words per minute.
+
+**Location:** `theme/macros/minutes-to-read.html`
+
+#### Parameters
+
+- `my_content` (required): Content object containing `post_body`
+- `before` (optional): HTML/text to display before the number (default: `'<span>'`)
+- `after` (optional): HTML/text to display after the number (default: `'</span>'`)
+
+#### Usage
+
+```jinja
+{# Import the macro #}
+{% from 'theme/macros/minutes-to-read.html' import minutes_to_read %}
+
+{# Basic usage #}
+{{ minutes_to_read(content) }}
+{# Output: <span>5</span> #}
+
+{# Custom formatting #}
+{{ minutes_to_read(content, '<span class="read-time">', ' min read</span>') }}
+{# Output: <span class="read-time">5 min read</span> #}
+
+{# In a blog post template #}
+<div class="post-meta">
+  {{ minutes_to_read(content, '<span class="text-sm">', ' minute read</span>') }}
+</div>
+```
+
+#### Implementation Details
+
+1. Strips HTML tags from the post body and counts words
+2. Rounds word count to nearest hundred
+3. Divides by 300 (average words per minute)
+4. Rounds to whole minutes
+5. Only displays if reading time is 1 minute or more
+
+---
+
+### random_int
+
+Generates a random 6-digit integer. Used internally by `unique_id` but can also be used standalone.
+
+**Location:** `theme/macros/random-int.html`
+
+#### Parameters
+
+None
+
+#### Usage
+
+```jinja
+{# Import the macro #}
+{% from 'theme/macros/random-int.html' import random_int %}
+
+{# Generate a random number #}
+{{ random_int() }}
+{# Output: 472819 (example) #}
+
+{# Use for random sorting or selection #}
+{% set random_order = random_int() %}
+```
+
+#### Implementation Details
+
+Generates a 6-digit number by randomly selecting digits from 0-9 six times in sequence.
+
+---
+
+## Best Practices
+
+### Importing Macros
+
+Always import macros at the top of your template file for better organization:
+
+```jinja
+{# Import all needed macros at the top #}
+{% from 'theme/macros/slugify.html' import slugify %}
+{% from 'theme/macros/unique-id.html' import unique_id %}
+{% from 'theme/macros/minutes-to-read.html' import minutes_to_read %}
+```
+
+### Performance Considerations
+
+- Macros are processed server-side during template rendering
+- `random_int` and `unique_id` generate different values on each page load
+- For consistent IDs across page loads, consider using content-based identifiers instead
+
+### Common Use Cases
+
+**Creating unique accordion IDs:**
+```jinja
+{% from 'theme/macros/unique-id.html' import unique_id %}
+
+{% for item in module.items %}
+  {% set accordion_id = unique_id() %}
+  <button data-toggle="collapse" data-target="#accordion_{{ accordion_id }}">
+    {{ item.title }}
+  </button>
+  <div id="accordion_{{ accordion_id }}" class="collapse">
+    {{ item.content }}
+  </div>
+{% endfor %}
+```
+
+**Creating SEO-friendly anchor links:**
+```jinja
+{% from 'theme/macros/slugify.html' import slugify %}
+
+<h2 id="{{ slugify(heading.text) }}">
+  {{ heading.text }}
+</h2>
+<a href="#{{ slugify(heading.text) }}">Link to section</a>
+```
+
+**Displaying blog reading time:**
+```jinja
+{% from 'theme/macros/minutes-to-read.html' import minutes_to_read %}
+
+<article>
+  <header>
+    <h1>{{ content.name }}</h1>
+    <div class="meta">
+      Published: {{ content.publish_date_localized }}
+      {{ minutes_to_read(content, ' • ', ' min read') }}
+    </div>
+  </header>
+</article>
+```

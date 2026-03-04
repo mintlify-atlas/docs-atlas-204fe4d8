@@ -1,0 +1,172 @@
+---
+title: Templates Overview
+description: Overview of template types in the FreshJuice DEV HubSpot theme
+---
+
+Templates in FreshJuice are organized into four main categories: layouts, partials, page templates, and system templates. Each serves a specific purpose in building your HubSpot website.
+
+## Template Structure
+
+All templates in FreshJuice are located in:
+
+```
+source/theme/templates/
+├── layouts/          # Base layout templates
+├── partials/         # Reusable template components
+├── system/           # System and error pages
+├── home.html         # Homepage template
+├── about.html        # About page template
+├── contact.html      # Contact page template
+├── pricing.html      # Pricing page template
+├── landing-page.html # Landing page template
+├── hubdb.html        # HubDB dynamic page template
+├── blog-index.html   # Blog listing template
+├── blog-post.html    # Blog post template (modern)
+└── blog-post-sidebar.html  # Blog post template (classic)
+```
+
+## Template Types
+
+### 1. Layouts
+
+Layout templates provide the base HTML structure that other templates extend.
+
+**Location:** `templates/layouts/`
+
+**Available layouts:**
+- `base.html` - Main layout with header, footer, and content blocks
+
+**Purpose:** Define the overall page structure, including:
+- HTML boilerplate
+- Meta tags and SEO elements
+- Standard header/footer includes
+- Main content areas
+- CSS and JavaScript loading
+
+### 2. Partials
+
+Partial templates are reusable components that can be included in other templates.
+
+**Location:** `templates/partials/`
+
+**Available partials:**
+- `header.html` - Standard website header with navigation
+- `header-no-navigation.html` - Simplified header without navigation
+- `footer.html` - Standard website footer
+- `footer-for-lp.html` - Simplified footer for landing pages
+
+**Purpose:** Provide modular, reusable template components that can be included across multiple templates.
+
+### 3. Page Templates
+
+Page templates define the structure and content for specific page types.
+
+**Location:** `templates/` (root)
+
+**Available templates:**
+- Homepage
+- About
+- Contact
+- Pricing
+- Landing Page
+- HubDB Dynamic Pages
+
+**Purpose:** Create specific page layouts that content editors can use when creating new pages.
+
+### 4. System Templates
+
+System templates handle special functionality like error pages, search results, and membership pages.
+
+**Location:** `templates/system/`
+
+**Available templates:**
+- Error pages (403, 404, 500)
+- Search results
+- Membership pages (login, register, reset password)
+- Subscription management
+- Password protection
+
+**Purpose:** Provide essential system functionality and user-facing error handling.
+
+## Template Annotations
+
+All FreshJuice templates include special HTML comments at the top that define template metadata:
+
+```html
+<!--
+  templateType: page
+  isAvailableForNewContent: true
+  label: Home
+  screenshotPath: ../images/template-previews/home.png
+-->
+```
+
+### Common Annotations
+
+| Annotation | Description | Values |
+|------------|-------------|--------|
+| `templateType` | Type of template | `page`, `blog_post`, `blog_listing`, `error_page`, `global_partial`, etc. |
+| `isAvailableForNewContent` | Whether editors can create new pages with this template | `true`, `false` |
+| `label` | Display name in HubSpot editor | Any string |
+| `screenshotPath` | Preview image path | Relative path to image |
+
+## HubL Template Language
+
+FreshJuice templates use HubL (HubSpot's templating language), which includes:
+
+### Template Inheritance
+
+```hubl
+{% extends "./layouts/base.html" %}
+```
+
+### Blocks
+
+```hubl
+{% block body %}
+  <!-- Content here -->
+{% endblock body %}
+```
+
+### Drag-and-Drop Areas
+
+```hubl
+{% dnd_area "dnd_area"
+  label="Main section",
+  class="body-container"
+%}
+  <!-- DnD content -->
+{% end_dnd_area %}
+```
+
+### Including Partials
+
+```hubl
+{% global_partial path="../partials/header.html" %}
+```
+
+### Modules
+
+```hubl
+{% module "module_name"
+  path="../modules/module-path",
+  label="Module Label"
+%}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Page Templates" icon="file" href="/templates/page-templates">
+    Learn about page templates for home, about, contact, and more
+  </Card>
+  <Card title="Blog Templates" icon="blog" href="/templates/blog-templates">
+    Explore blog listing and blog post templates
+  </Card>
+  <Card title="System Templates" icon="gear" href="/templates/system-templates">
+    Understand error pages and system functionality
+  </Card>
+  <Card title="Modules" icon="cube" href="/modules/overview">
+    Learn about modules used within templates
+  </Card>
+</CardGroup>

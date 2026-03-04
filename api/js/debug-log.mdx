@@ -1,0 +1,133 @@
+---
+title: "debugLog"
+description: "Debug logging utility for FreshJuice DEV theme"
+---
+
+## Overview
+
+The `debugLog` function provides conditional console logging for debugging purposes. It only outputs logs when running in HubSpot environments or when explicitly enabled via sessionStorage.
+
+## Location
+
+```
+source/js/modules/_debugLog.js
+```
+
+## Function Signature
+
+```javascript
+debugLog(...args)
+```
+
+## Parameters
+
+<ParamField path="...args" type="any">
+  Variable number of arguments to be logged to the console. Can be any JavaScript value (strings, objects, arrays, etc.).
+</ParamField>
+
+## Returns
+
+**Type:** `void`
+
+This function does not return any value.
+
+## Behavior
+
+The function logs messages to the console **only when**:
+
+1. The hostname matches HubSpot patterns (`.hs-sites` or `.hubspot`), OR
+2. The `juice` key exists in `sessionStorage`
+
+All logged messages are prefixed with a cocktail emoji (🍹) for easy identification.
+
+## Implementation
+
+```javascript
+module.exports = (...args) => {
+  if (location.hostname.match(/(.hs-sites|.hubspot)/g) || window.sessionStorage.juice)
+    console.log("🍹:", ...args);
+};
+```
+
+## Usage Examples
+
+### Basic Logging
+
+```javascript
+import debugLog from './modules/_debugLog';
+
+debugLog('Component initialized');
+// Output (if conditions met): 🍹: Component initialized
+```
+
+### Logging Multiple Values
+
+```javascript
+const userId = 123;
+const userData = { name: 'John', role: 'admin' };
+
+debugLog('User loaded:', userId, userData);
+// Output (if conditions met): 🍹: User loaded: 123 {name: 'John', role: 'admin'}
+```
+
+### In Alpine.data Components
+
+```javascript
+Alpine.data('myComponent', () => ({
+  init() {
+    debugLog('myComponent initialized', this.$el);
+  }
+}));
+```
+
+## Enabling Debug Logs
+
+To enable debug logging in any environment, set the `juice` key in sessionStorage:
+
+### Via Browser Console
+
+```javascript
+sessionStorage.setItem('juice', 'true');
+```
+
+### Via Alpine.data xDOM Component
+
+```html
+<button @click="debugLog('Button clicked!')">Test Debug</button>
+```
+
+## Automatic Activation
+
+Debug logs are automatically enabled when:
+
+- **Local HubSpot Development**: Hostname contains `.hs-sites`
+- **HubSpot Platform**: Hostname contains `.hubspot`
+
+## Disabling Debug Logs
+
+To disable debug logging:
+
+```javascript
+sessionStorage.removeItem('juice');
+```
+
+Then refresh the page.
+
+## Best Practices
+
+<Note>
+- Use `debugLog` instead of `console.log` for development-only messages
+- Leave debug statements in production code - they won't execute unless explicitly enabled
+- Log meaningful context, not just values (e.g., include labels with your data)
+</Note>
+
+<Warning>
+- Debug logs will appear in production for users on HubSpot domains
+- Avoid logging sensitive information (passwords, tokens, personal data)
+- Remove or disable verbose debugging before major releases
+</Warning>
+
+## Related
+
+- [main.js](/api/js/main) - Main entry point that imports debugLog
+- [Alpine.data (xDOM)](/api/js/alpine-data) - Exposes debugLog in Alpine components

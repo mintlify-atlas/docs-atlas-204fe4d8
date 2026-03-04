@@ -1,0 +1,476 @@
+---
+title: Blog Modules
+description: Documentation for blog modules including blog listing, pagination, related posts, and author information
+---
+
+Blog modules in FreshJuice DEV provide the essential components for creating and displaying blog content in HubSpot.
+
+## Available Blog Modules
+
+FreshJuice includes 5 specialized blog modules:
+
+### Blog Listing Modules
+
+<AccordionGroup>
+  <Accordion title="Blog Listing">
+    **Module:** `blog-listing.module`
+    
+    **Category:** Blog
+    
+    **Tag:** BLOG
+    
+    **Purpose:** Display a list of blog posts with customizable layout options.
+    
+    **Features:**
+    - Grid or list layout
+    - Post thumbnails
+    - Post excerpts
+    - Author and date information
+    - Category/tag display
+    - Customizable post count
+    
+    **Use cases:**
+    - Main blog page
+    - Blog archives
+    - Category listings
+    - Tag listings
+    
+    **Available for:** Blog listing pages only
+    
+    **Template usage:**
+    ```hubl
+    {% module "blog_posts"
+      path="../modules/blog-listing.module",
+      label="Blog Posts"
+    %}
+    ```
+  </Accordion>
+  
+  <Accordion title="Blog Listing Hero">
+    **Module:** `blog-listing-hero.module`
+    
+    **Category:** Blog
+    
+    **Tags:** BLOG, HEADERS
+    
+    **Purpose:** Hero section for blog listing pages featuring the latest or featured post.
+    
+    **Features:**
+    - Featured post display
+    - Large hero image
+    - Post title and excerpt
+    - CTA button
+    - Author information
+    
+    **Use cases:**
+    - Blog homepage hero
+    - Featured post highlight
+    - Blog page header
+    
+    **Available for:** Blog listing pages only
+    
+    **Note:** Not available for new content (`is_available_for_new_content: false`)
+  </Accordion>
+</AccordionGroup>
+
+### Pagination
+
+<AccordionGroup>
+  <Accordion title="Blog Pagination">
+    **Module:** `blog-pagination.module`
+    
+    **Category:** Blog
+    
+    **Tags:** BLOG, NAVIGATION
+    
+    **Purpose:** Pagination controls for navigating through multiple pages of blog posts.
+    
+    **Features:**
+    - Previous/Next buttons
+    - Page numbers
+    - Current page indicator
+    - Customizable button styles
+    - Accessible navigation
+    
+    **Use cases:**
+    - Blog listing pagination
+    - Archive navigation
+    - Multi-page post lists
+    
+    **Available for:** Blog listing pages only
+    
+    **Template usage:**
+    ```hubl
+    {% module "blog_pagination"
+      path="../modules/blog-pagination.module",
+      label="Blog Pagination"
+    %}
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Related Content
+
+<AccordionGroup>
+  <Accordion title="Related Posts">
+    **Module:** `related-posts.module`
+    
+    **Purpose:** Display related blog posts at the end of a blog post to keep readers engaged.
+    
+    **Features:**
+    - Automatic related post detection
+    - Customizable post count (typically 3-4 posts)
+    - Post thumbnails and titles
+    - Related by tags/categories
+    - Grid layout
+    
+    **Use cases:**
+    - End of blog posts
+    - "Read more" sections
+    - Content discovery
+    - Increased engagement
+    
+    **Available for:** Blog post pages only
+    
+    **Template usage:**
+    ```hubl
+    {% module "related_posts"
+      path="../modules/related-posts.module",
+      label="Related Posts"
+    %}
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Author & Sharing (Global Modules)
+
+<AccordionGroup>
+  <Accordion title="Post Author">
+    **Module:** `global-post-author.module`
+    
+    **Type:** Global Module
+    
+    **Purpose:** Display blog post author information including name, bio, and avatar.
+    
+    **Features:**
+    - Author avatar
+    - Author name
+    - Author bio
+    - Social links
+    - Author archive link
+    
+    **Use cases:**
+    - Author byline
+    - Author bio section
+    - Blog post attribution
+    
+    **Available for:** Blog post pages only
+    
+    **Note:** Global module, not available for new content (`is_available_for_new_content: false`)
+  </Accordion>
+  
+  <Accordion title="Share Buttons">
+    **Module:** `global-share-buttons.module`
+    
+    **Type:** Global Module
+    
+    **Category:** Social
+    
+    **Tags:** SOCIAL, BLOG_POST
+    
+    **Purpose:** Social sharing buttons for blog posts.
+    
+    **Features:**
+    - Share to major social platforms
+    - Email sharing
+    - Copy link functionality
+    - Custom button styles
+    - Share counts (optional)
+    
+    **Platforms supported:**
+    - Twitter/X
+    - Facebook
+    - LinkedIn
+    - Email
+    - Copy link
+    
+    **Use cases:**
+    - Blog post sharing
+    - Social engagement
+    - Content distribution
+    
+    **Available for:** Blog post pages only
+    
+    **Note:** Global module, not available for new content (`is_available_for_new_content: false`)
+  </Accordion>
+</AccordionGroup>
+
+## Blog Module Comparison
+
+| Module | Type | Template Type | Purpose |
+|--------|------|---------------|----------|
+| Blog Listing | Standard | Blog Listing | Display list of posts |
+| Blog Listing Hero | Standard | Blog Listing | Featured post hero |
+| Blog Pagination | Standard | Blog Listing | Navigate post pages |
+| Related Posts | Standard | Blog Post | Show related content |
+| Post Author | Global | Blog Post | Author information |
+| Share Buttons | Global | Blog Post | Social sharing |
+
+## Blog Listing Template Example
+
+Here's a complete example of a blog listing template:
+
+```hubl
+{# templates/blog-index.html #}
+<!--
+  templateType: blog_listing
+  isAvailableForNewContent: true
+  label: Blog Listing
+-->
+
+{% extends "./layouts/base.html" %}
+
+{% block body %}
+  {% dnd_area "blog_listing" %}
+    
+    {# Hero section with featured post #}
+    {% dnd_module "blog_hero"
+      path="../modules/blog-listing-hero.module",
+      label="Blog Hero"
+    %}
+    {% end_dnd_module %}
+    
+    {# Blog post listing #}
+    {% dnd_module "blog_posts"
+      path="../modules/blog-listing.module",
+      label="Blog Posts"
+    %}
+    {% end_dnd_module %}
+    
+    {# Pagination #}
+    {% dnd_module "pagination"
+      path="../modules/blog-pagination.module",
+      label="Pagination"
+    %}
+    {% end_dnd_module %}
+    
+  {% end_dnd_area %}
+{% endblock body %}
+```
+
+## Blog Post Template Example
+
+Here's a complete example of a blog post template:
+
+```hubl
+{# templates/blog-post.html #}
+<!--
+  templateType: blog_post
+  isAvailableForNewContent: true
+  label: Blog Post
+-->
+
+{% extends "./layouts/base.html" %}
+
+{% block body %}
+  <article class="blog-post">
+    
+    {# Post header #}
+    <header class="post-header">
+      <h1>{{ content.name }}</h1>
+      <div class="post-meta">
+        <time datetime="{{ content.publish_date }}">{{ content.publish_date_localized }}</time>
+      </div>
+    </header>
+    
+    {# Featured image #}
+    {% if content.featured_image %}
+      <img src="{{ content.featured_image }}" alt="{{ content.featured_image_alt_text }}">
+    {% endif %}
+    
+    {# Post content #}
+    <div class="post-content">
+      {{ content.post_body }}
+    </div>
+    
+    {# Author information (global module) #}
+    {% global_partial path="../partials/post-author.html" %}
+    
+    {# Share buttons (global module) #}
+    {% global_partial path="../partials/share-buttons.html" %}
+    
+    {# Related posts #}
+    {% module "related_posts"
+      path="../modules/related-posts.module",
+      label="Related Posts"
+    %}
+    
+  </article>
+{% endblock body %}
+```
+
+## Blog Variables
+
+FreshJuice blog modules have access to HubSpot blog variables:
+
+### Blog Listing Variables
+
+```hubl
+{{ contents }}                 {# List of blog posts #}
+{{ contents.total_count }}     {# Total number of posts #}
+{{ contents.total_page_count }} {# Total number of pages #}
+{{ current_page_num }}         {# Current page number #}
+```
+
+### Blog Post Variables
+
+```hubl
+{{ content.name }}                    {# Post title #}
+{{ content.post_body }}               {# Post content #}
+{{ content.post_summary }}            {# Post excerpt #}
+{{ content.publish_date }}            {# Publish date #}
+{{ content.publish_date_localized }}  {# Localized date #}
+{{ content.featured_image }}          {# Featured image URL #}
+{{ content.featured_image_alt_text }} {# Image alt text #}
+{{ content.topic_list }}              {# Post topics/tags #}
+{{ content.blog_author }}             {# Author object #}
+{{ content.blog_author.display_name }} {# Author name #}
+{{ content.blog_author.avatar }}      {# Author avatar #}
+{{ content.blog_author.bio }}         {# Author bio #}
+```
+
+## Customizing Blog Modules
+
+### Styling Blog Listings
+
+```css
+/* Blog listing grid layout */
+.blog-listing {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+}
+
+.blog-post-card {
+  @apply bg-white rounded-lg shadow-md overflow-hidden;
+}
+
+.blog-post-image {
+  @apply w-full h-48 object-cover;
+}
+
+.blog-post-title {
+  @apply text-xl font-bold mb-2;
+}
+
+.blog-post-excerpt {
+  @apply text-gray-600 mb-4;
+}
+```
+
+### Configuring Related Posts
+
+Customize how many related posts to display:
+
+```json
+{
+  "name": "post_count",
+  "label": "Number of posts",
+  "type": "number",
+  "default": 3
+}
+```
+
+## Blog Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use featured images">
+    Always include featured images for blog posts. They appear in blog listings and social shares.
+  </Accordion>
+  
+  <Accordion title="Write compelling excerpts">
+    Post summaries appear in blog listings. Write clear, engaging excerpts that encourage clicks.
+  </Accordion>
+  
+  <Accordion title="Enable related posts">
+    Related posts keep readers engaged and increase pageviews. Place them at the end of blog posts.
+  </Accordion>
+  
+  <Accordion title="Use pagination">
+    For better performance, paginate blog listings instead of showing all posts on one page.
+  </Accordion>
+  
+  <Accordion title="Include social sharing">
+    Social share buttons make it easy for readers to promote your content.
+  </Accordion>
+  
+  <Accordion title="Display author information">
+    Author bios build trust and authority. Include author information on blog posts.
+  </Accordion>
+  
+  <Accordion title="Organize with topics">
+    Use HubSpot topics (tags) to categorize posts and power related post functionality.
+  </Accordion>
+</AccordionGroup>
+
+## Performance Tips
+
+<Note>
+  **Optimization:** Blog listings can be optimized by limiting the number of posts per page and using lazy loading for images.
+</Note>
+
+- **Limit posts per page:** Show 9-12 posts per page, use pagination for more
+- **Optimize images:** Use HubSpot's image optimization for featured images
+- **Lazy load images:** Use loading="lazy" attribute for post thumbnails
+- **Cache related posts:** Related posts are automatically cached by HubSpot
+
+## SEO Considerations
+
+### Blog Listing SEO
+
+```hubl
+{# Add schema markup for blog listing #}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "{{ group.name }}",
+  "url": "{{ group.absolute_url }}"
+}
+</script>
+```
+
+### Blog Post SEO
+
+```hubl
+{# Add schema markup for blog post #}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ content.name }}",
+  "image": "{{ content.featured_image }}",
+  "datePublished": "{{ content.publish_date }}",
+  "dateModified": "{{ content.updated }}",
+  "author": {
+    "@type": "Person",
+    "name": "{{ content.blog_author.display_name }}"
+  }
+}
+</script>
+```
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Blog Templates" icon="blog" href="/templates/blog-templates">
+    Learn about blog listing and blog post templates
+  </Card>
+  <Card title="Content Modules" icon="cube" href="/modules/content-modules">
+    Explore other content modules
+  </Card>
+  <Card title="HubL Templates" icon="code" href="/development/hubl-templates">
+    Learn about HubL templating language
+  </Card>
+  <Card title="Creating Modules" icon="code" href="/guides/creating-modules">
+    Build custom blog modules
+  </Card>
+</CardGroup>

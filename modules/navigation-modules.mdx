@@ -1,0 +1,388 @@
+---
+title: Navigation Modules
+description: Documentation for navigation modules including navigation bars, menus, and footer components
+---
+
+Navigation modules provide the structural elements for site navigation and global components like headers and footers in FreshJuice DEV.
+
+## Available Navigation Modules
+
+FreshJuice includes 6 navigation modules:
+
+### Navigation Bars
+
+<AccordionGroup>
+  <Accordion title="Navigation Bar">
+    **Module:** `navigation-bar.module`
+    
+    **Category:** Functionality
+    
+    **Tag:** NAVIGATION
+    
+    **Purpose:** The main navigation bar at the top of a website. Includes logo, action buttons (like "log in" or "buy now"), and menu options for different pages or sections.
+    
+    **Features:**
+    - Logo placement
+    - Primary navigation menu
+    - CTA buttons
+    - Mobile-responsive hamburger menu
+    - Sticky/fixed positioning support
+    
+    **Use cases:**
+    - Main site navigation
+    - Header navigation
+    - Top-level menu structure
+    
+    **Available for:** Landing pages, site pages, blog listings, blog posts
+  </Accordion>
+  
+  <Accordion title="Navigation Bar Simple">
+    **Module:** `navigation-bar-simple.module`
+    
+    **Category:** Functionality
+    
+    **Tag:** NAVIGATION
+    
+    **Purpose:** Simplified version of the navigation bar with fewer options and a cleaner layout.
+    
+    **Features:**
+    - Minimalist design
+    - Logo and basic menu
+    - Reduced complexity
+    - Mobile-responsive
+    
+    **Use cases:**
+    - Landing pages
+    - Minimal navigation needs
+    - Clean, simple layouts
+    
+    **Available for:** Landing pages, site pages, blog listings, blog posts
+  </Accordion>
+</AccordionGroup>
+
+### Menus
+
+<AccordionGroup>
+  <Accordion title="Menu">
+    **Module:** `menu.module`
+    
+    **Category:** Functionality
+    
+    **Purpose:** Standalone menu component that can be used independently or within other modules.
+    
+    **Features:**
+    - Customizable menu items
+    - Support for nested menus
+    - Multiple layout options
+    - Mobile-friendly
+    
+    **Use cases:**
+    - Footer menus
+    - Sidebar navigation
+    - Secondary menus
+    - Dropdown menus
+    
+    **Available for:** Landing pages, site pages, blog listings, blog posts
+  </Accordion>
+</AccordionGroup>
+
+### Footers
+
+<AccordionGroup>
+  <Accordion title="Global Footer">
+    **Module:** `global-footer.module`
+    
+    **Type:** Global Module
+    
+    **Purpose:** The main site-wide footer that appears on all pages. Typically includes multiple columns with links, contact information, and legal links.
+    
+    **Features:**
+    - Multi-column layout
+    - Logo placement
+    - Menu links
+    - Social media icons
+    - Copyright and legal links
+    - Contact information
+    
+    **Use cases:**
+    - Site-wide footer
+    - Standard pages
+    - Blog posts
+    
+    **Available for:** Landing pages, site pages, blog listings, blog posts
+    
+    **Note:** This is a global module and is typically included via partials:
+    ```hubl
+    {% global_partial path="../partials/footer.html" %}
+    ```
+  </Accordion>
+  
+  <Accordion title="Global Footer for Landing Pages">
+    **Module:** `global-footer-lp.module`
+    
+    **Type:** Global Module
+    
+    **Purpose:** Simplified footer specifically designed for landing pages with fewer distractions and focused CTAs.
+    
+    **Features:**
+    - Minimal design
+    - Fewer links
+    - Focused on conversion
+    - Essential legal links only
+    
+    **Use cases:**
+    - Landing pages
+    - High-converting pages
+    - Minimal footer needs
+    
+    **Available for:** Landing pages, site pages, blog listings, blog posts
+    
+    **Note:** This is a global module and is typically included via partials:
+    ```hubl
+    {% global_partial path="../partials/footer-for-lp.html" %}
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Utility Modules
+
+<AccordionGroup>
+  <Accordion title="Scroll to Top">
+    **Module:** `global-scroll-to-top.module`
+    
+    **Type:** Global Module
+    
+    **Purpose:** Floating button that allows users to quickly scroll back to the top of the page.
+    
+    **Features:**
+    - Appears on scroll
+    - Smooth scroll animation
+    - Customizable position
+    - Mobile-friendly
+    
+    **Use cases:**
+    - Long pages
+    - Blog posts
+    - Improved user experience
+    
+    **Available for:** Landing pages, site pages, blog listings, blog posts
+    
+    **Note:** This is a global module that appears automatically on pages.
+  </Accordion>
+</AccordionGroup>
+
+## Module Comparison
+
+| Module | Type | Purpose | Best For |
+|--------|------|---------|----------|
+| Navigation Bar | Standard | Full-featured navigation | Main site navigation |
+| Navigation Bar Simple | Standard | Minimal navigation | Landing pages |
+| Menu | Standard | Standalone menu | Footer/sidebar menus |
+| Global Footer | Global | Full site footer | Standard pages |
+| Global Footer LP | Global | Minimal footer | Landing pages |
+| Scroll to Top | Global | Scroll utility | Long content pages |
+
+## Usage in Templates
+
+### Adding Navigation to a Template
+
+```hubl
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Head content -->
+</head>
+<body>
+  
+  {# Navigation Bar #}
+  {% module "main_navigation"
+    path="../modules/navigation-bar.module",
+    label="Main Navigation"
+  %}
+  
+  {# Main Content #}
+  {% block body %}
+    <!-- Page content -->
+  {% endblock body %}
+  
+  {# Footer #}
+  {% global_partial path="../partials/footer.html" %}
+  
+  {# Scroll to Top (included automatically if global) #}
+  
+</body>
+</html>
+```
+
+### Navigation Bar in Drag-and-Drop Area
+
+```hubl
+{% dnd_area "header" %}
+  {% dnd_module "site_navigation"
+    path="../modules/navigation-bar.module",
+    label="Site Navigation"
+  %}
+  {% end_dnd_module %}
+{% end_dnd_area %}
+```
+
+### Using Simple Navigation for Landing Pages
+
+```hubl
+{% dnd_area "header" %}
+  {% dnd_module "simple_nav"
+    path="../modules/navigation-bar-simple.module",
+    label="Simple Navigation"
+  %}
+  {% end_dnd_module %}
+{% end_dnd_area %}
+
+{# Content #}
+
+{% global_partial path="../partials/footer-for-lp.html" %}
+```
+
+## Global vs Standard Modules
+
+<Note>
+  **Global Modules** are special modules that are typically managed at the site level and included via partials. They maintain consistent branding and functionality across all pages.
+</Note>
+
+### Global Modules
+
+- **Global Footer** - `global: true`
+- **Global Footer LP** - `global: true`
+- **Scroll to Top** - `global: true`
+
+Global modules are managed centrally and changes apply site-wide.
+
+### Standard Modules
+
+- **Navigation Bar**
+- **Navigation Bar Simple**
+- **Menu**
+
+Standard modules can be customized per page or template.
+
+## Navigation Best Practices
+
+<AccordionGroup>
+  <Accordion title="Choose the right navigation type">
+    Use the full Navigation Bar for standard pages with multiple menu items. Use Navigation Bar Simple for landing pages to reduce distractions.
+  </Accordion>
+  
+  <Accordion title="Keep navigation consistent">
+    Use the same navigation module across similar page types for a consistent user experience.
+  </Accordion>
+  
+  <Accordion title="Use appropriate footers">
+    Use Global Footer for standard pages and Global Footer LP for landing pages where you want to minimize distractions.
+  </Accordion>
+  
+  <Accordion title="Enable scroll to top on long pages">
+    The Scroll to Top module improves UX on pages with lots of content, especially blog posts.
+  </Accordion>
+  
+  <Accordion title="Test mobile navigation">
+    Always test navigation modules on mobile devices to ensure the hamburger menu and mobile layouts work correctly.
+  </Accordion>
+  
+  <Accordion title="Optimize menu structure">
+    Keep navigation menus focused with 5-7 main items. Use dropdown menus for additional pages.
+  </Accordion>
+</AccordionGroup>
+
+## Customizing Navigation
+
+### Navigation Menu Items
+
+Navigation menus in FreshJuice are managed through HubSpot's menu editor:
+
+1. Go to **Marketing** > **Files and Templates** > **Design Tools**
+2. Navigate to **Menus**
+3. Create or edit your menu
+4. Assign the menu to your navigation module
+
+### Styling Navigation
+
+Navigation modules use Tailwind CSS and can be customized:
+
+```css
+/* module.css */
+.navigation-bar {
+  @apply bg-white shadow-md;
+}
+
+.nav-link {
+  @apply px-4 py-2 hover:text-primary transition-colors;
+}
+```
+
+### Mobile Responsiveness
+
+All navigation modules are mobile-responsive by default:
+
+- Hamburger menu for mobile devices
+- Touch-friendly navigation
+- Responsive breakpoints using Tailwind
+
+## Template Integration
+
+### Base Template with Navigation
+
+```hubl
+{# templates/layouts/base.html #}
+<!DOCTYPE html>
+<html lang="{{ html_lang }}" dir="{{ html_lang_dir }}">
+<head>
+  {{ standard_header_includes }}
+</head>
+<body>
+  
+  {# Header with navigation #}
+  {% block header %}
+    {% global_partial path="../partials/header.html" %}
+  {% endblock header %}
+  
+  {# Main content #}
+  {% block body %}
+  {% endblock body %}
+  
+  {# Footer #}
+  {% block footer %}
+    {% global_partial path="../partials/footer.html" %}
+  {% endblock footer %}
+  
+  {{ standard_footer_includes }}
+</body>
+</html>
+```
+
+### Header Partial
+
+```hubl
+{# templates/partials/header.html #}
+<header>
+  {% module "main_navigation"
+    path="../../modules/navigation-bar.module",
+    label="Main Navigation"
+  %}
+</header>
+```
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Content Modules" icon="cube" href="/modules/content-modules">
+    Accordion, Button, Card, Tabs, and more
+  </Card>
+  <Card title="Templates" icon="file" href="/templates/overview">
+    Learn about template structure and partials
+  </Card>
+  <Card title="Creating Modules" icon="code" href="/guides/creating-modules">
+    Build custom navigation modules
+  </Card>
+  <Card title="Styling Components" icon="palette" href="/guides/styling-components">
+    Customize navigation appearance
+  </Card>
+</CardGroup>

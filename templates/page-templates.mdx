@@ -1,0 +1,493 @@
+---
+title: Page Templates
+description: Documentation for page templates in the FreshJuice DEV HubSpot theme
+---
+
+Page templates define the structure and layout for different types of content pages. Each template is designed for a specific purpose and includes drag-and-drop areas for easy content editing.
+
+## Available Page Templates
+
+### Home Template
+
+**File:** `templates/home.html`
+
+**Purpose:** Homepage template with hero banner and multiple content sections.
+
+#### Template Annotations
+
+```html
+<!--
+  templateType: page
+  isAvailableForNewContent: true
+  label: Home
+  screenshotPath: ../images/template-previews/home.png
+-->
+```
+
+#### Structure
+
+```hubl
+{% extends "./layouts/base.html" %}
+
+{% block body %}
+
+{% dnd_area "dnd_area"
+  label="Main section",
+  class="body-container body-container--home"
+%}
+
+  {# Hero banner #}
+  {% include_dnd_partial path="../sections/hero-banner.html" %}
+
+  {# Two column image right #}
+  {% include_dnd_partial path="../sections/row-content-img-right.html" %}
+
+  {# Two column image left #}
+  {% include_dnd_partial path="../sections/row-content-img-left.html" %}
+
+  {# Call to action #}
+  {% include_dnd_partial path="../sections/call-to-action.html" %}
+
+  {# Three column image with text #}
+  {% include_dnd_partial path="../sections/multi-column-content.html" %}
+
+{% end_dnd_area %}
+{% endblock body %}
+```
+
+#### Included Sections
+
+- **Hero Banner** - Large banner with headline and CTA
+- **Two Column Content** - Content with image (left or right)
+- **Call to Action** - Centered CTA section
+- **Multi-Column Content** - Three column layout with images and text
+
+---
+
+### About Template
+
+**File:** `templates/about.html`
+
+**Purpose:** About page with two-column layout featuring an image and rich text.
+
+#### Template Annotations
+
+```html
+<!--
+  templateType: page
+  isAvailableForNewContent: true
+  label: About
+  screenshotPath: ../images/template-previews/about.png
+-->
+```
+
+#### Structure
+
+```hubl
+{% extends "./layouts/base.html" %}
+
+{% block body %}
+{% dnd_area "dnd_area"
+  label="Main section",
+  class="body-container body-container--about"
+%}
+
+  {# Two column image left #}
+  {% dnd_section
+    vertical_alignment="TOP"
+  %}
+    {% dnd_module
+      path="@hubspot/linked_image",
+      img={
+        "alt": "Worker pouring Watermelon Juice for the other coworkers.",
+        "loading": "disabled",
+        "max_height": 450,
+        "max_width": 800,
+        "size_type": "auto_custom_max",
+        "src": "https://resources.freshjuice.dev/images/800/pour-watermelon-juice.jpg"
+      },
+      offset=0,
+      width=6
+    %}
+    {% end_dnd_module %}
+    {% dnd_module
+      path="@hubspot/rich_text",
+      html="<h1>About FreshJuice</h1><p>We are a free and open-source hubspot multi-purpose theme...</p>"
+      offset=6,
+      width=6
+    %}
+    {% end_dnd_module %}
+  {% end_dnd_section %}
+
+{% end_dnd_area %}
+{% endblock body %}
+```
+
+#### Features
+
+- Two-column layout with image on the left
+- Rich text content on the right
+- Fully editable in drag-and-drop editor
+- Default content with placeholder image
+
+---
+
+### Contact Template
+
+**File:** `templates/contact.html`
+
+**Purpose:** Simple contact page template with cards section.
+
+#### Template Annotations
+
+```html
+<!--
+  templateType: page
+  isAvailableForNewContent: true
+  label: Contact
+  screenshotPath: ../images/template-previews/contact.png
+-->
+```
+
+#### Structure
+
+```hubl
+{% extends "./layouts/base.html" %}
+
+{% block body %}
+{% dnd_area "dnd_area"
+  label="Main section",
+  class="body-container body-container--contact"
+%}
+
+  {# Cards #}
+  {% include_dnd_partial path="../sections/cards.html" %}
+
+{% end_dnd_area %}
+{% endblock body %}
+```
+
+#### Features
+
+- Minimal structure for flexibility
+- Includes cards section by default
+- Content editors can add forms and additional modules
+
+---
+
+### Pricing Template
+
+**File:** `templates/pricing.html`
+
+**Purpose:** Pricing page with pricing table section.
+
+#### Template Annotations
+
+```html
+<!--
+  templateType: page
+  isAvailableForNewContent: true
+  label: Pricing
+  screenshotPath: ../images/template-previews/pricing.png
+-->
+```
+
+#### Structure
+
+```hubl
+{% extends "./layouts/base.html" %}
+
+{% block body %}
+{% dnd_area "dnd_area"
+  label="Main section",
+  class="body-container body-container--pricing"
+%}
+
+  {# Pricing #}
+  {% include_dnd_partial path="../sections/pricing.html" %}
+
+{% end_dnd_area %}
+{% endblock body %}
+```
+
+#### Features
+
+- Pre-configured pricing section
+- Drag-and-drop area for adding more content
+- Fully customizable pricing table module
+
+---
+
+### Landing Page Template
+
+**File:** `templates/landing-page.html`
+
+**Purpose:** Conversion-focused landing page with simplified header and footer.
+
+#### Template Annotations
+
+```html
+<!--
+  templateType: page
+  isAvailableForNewContent: true
+  label: Landing page
+  screenshotPath: ../images/template-previews/landing-page.png
+-->
+```
+
+#### Structure
+
+```hubl
+{% extends "./layouts/base.html" %}
+
+{% block header %}
+  {% global_partial path="./partials/header-no-navigation.html" %}
+{% endblock header %}
+
+{% block body %}
+{% dnd_area "dnd_area"
+  label="Main section",
+  class="body-container body-container--landing-page"
+%}
+
+  {# Hero banner #}
+  {% include_dnd_partial path="../sections/hero-banner.html" %}
+
+  {# Three column image with text #}
+  {% include_dnd_partial
+    path="../sections/multi-column-content.html",
+    context={
+      "background_color": "#FFFFFF"
+    }
+  %}
+
+{% end_dnd_area %}
+{% endblock body %}
+
+{% block footer %}
+  {% global_partial path="./partials/footer-for-lp.html" %}
+{% endblock footer %}
+```
+
+#### Features
+
+- **Simplified Header** - No navigation menu to reduce distractions
+- **Simplified Footer** - Minimal footer for better conversion
+- **Hero Banner** - Large, attention-grabbing hero section
+- **Multi-Column Content** - Showcase benefits or features
+- **Context Passing** - Demonstrates passing context to partials
+
+<Note>
+The landing page template overrides the default header and footer blocks to use simplified versions, reducing distractions and improving conversion rates.
+</Note>
+
+---
+
+### HubDB Template
+
+**File:** `templates/hubdb.html`
+
+**Purpose:** Dynamic page template for displaying HubDB table data.
+
+#### Template Annotations
+
+```html
+<!--
+  templateType: page
+  isAvailableForNewContent: false
+  label: HubDB
+  screenshotPath: ../images/template-previews/hubdb.png
+-->
+```
+
+<Warning>
+This template requires CMS Hub and should not be used in accounts without HubDB access. If you're creating a marketplace asset, this template should be removed as HubDB templates are not accepted in the marketplace.
+</Warning>
+
+#### Testing Configuration
+
+```hubl
+{# Testing config #}
+{% set testing = true %} {# Set to false for production #}
+{% set testing_table_id = null %} {# Set to HubDB table id (integer) #}
+{% set testing_row_id = null %} {# Set to a HubDB table row id (integer) #}
+{% set testing_page_level = 0 %} {# 0 for root, 1 for dynamic page #}
+```
+
+#### Structure
+
+```hubl
+{% extends "./layouts/base.html" %}
+
+{# Testing/production logic #}
+{% if testing %}
+  {% set table_id = testing_table_id %}
+  {% set row = hubdb_table_row( table_id, testing_row_id ) %}
+  {% set page_level = testing_page_level %}
+{% else %}
+  {% set table_id = dynamic_page_hubdb_table_id %}
+  {% set row = dynamic_page_hubdb_row %}
+  {% set page_level = dynamic_page_route_level %}
+{% endif %}
+
+{% set rows = hubdb_table_rows( table_id ) %}
+
+{% block body %}
+<div class="body-container body-container--hubdb">
+  <section class="content-wrapper content-wrapper--vertical-spacing">
+
+    {% if table_id %}
+
+      {# Root level - display all rows #}
+      {% if page_level == 0 and rows|length > 0 %}
+        <header>
+          <h1>
+            {% module "page_title" path="@hubspot/text",
+              label="Page title",
+              value="Root Page Title"
+            %}
+          </h1>
+        </header>
+
+        <ul>
+          {% for row in rows %}
+            <li>
+              <a href="{{ request.path }}/{{ row.hs_path }}">{{ row.name }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+
+      {# Detail level - display single row #}
+      {% elif page_level == 1 and row %}
+
+        <header>
+          <h1>{{ row.name }}</h1>
+        </header>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Label</th>
+              <th>Name</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for col in hubdb_table( table_id ).columns %}
+              <tr>
+                <th>{{ col.label }}</th>
+                <td><code>{{ col.name }}</code></td>
+                <td>{{ row[ col.name ] }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+      {% endif %}
+
+    {% else %}
+      {# Error handling for missing table selection #}
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
+```
+
+#### Features
+
+- **Testing Mode** - Preview template with specific table/row IDs
+- **Two-Level Display** - Root level (list all rows) and detail level (single row)
+- **Dynamic Routing** - Automatically creates URLs based on HubDB data
+- **Error Handling** - Shows helpful message if no table is selected
+
+#### Usage
+
+1. **Development:** Set `testing = true` and configure test IDs
+2. **Production:** Set `testing = false` and `isAvailableForNewContent = true`
+3. **Create Page:** Select a HubDB table when creating a new page
+
+## Common Patterns
+
+### Extending the Base Layout
+
+All page templates extend the base layout:
+
+```hubl
+{% extends "./layouts/base.html" %}
+```
+
+### Defining Content Blocks
+
+Override the `body` block to add page content:
+
+```hubl
+{% block body %}
+  <!-- Your content here -->
+{% endblock body %}
+```
+
+### Creating Drag-and-Drop Areas
+
+Use `dnd_area` for editable content regions:
+
+```hubl
+{% dnd_area "dnd_area"
+  label="Main section",
+  class="body-container body-container--custom"
+%}
+  <!-- DnD content -->
+{% end_dnd_area %}
+```
+
+### Including Sections
+
+Include reusable sections as DnD partials:
+
+```hubl
+{% include_dnd_partial path="../sections/hero-banner.html" %}
+```
+
+### Passing Context to Partials
+
+Pass custom context variables:
+
+```hubl
+{% include_dnd_partial
+  path="../sections/multi-column-content.html",
+  context={
+    "background_color": "#FFFFFF"
+  }
+%}
+```
+
+## Template Class Naming
+
+Each template includes a unique body container class:
+
+```css
+.body-container--home
+.body-container--about
+.body-container--contact
+.body-container--pricing
+.body-container--landing-page
+.body-container--hubdb
+```
+
+These classes allow for template-specific styling in your CSS.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Blog Templates" icon="blog" href="/templates/blog-templates">
+    Learn about blog listing and post templates
+  </Card>
+  <Card title="System Templates" icon="gear" href="/templates/system-templates">
+    Explore error pages and system templates
+  </Card>
+  <Card title="Sections" icon="layer-group" href="/guides/custom-sections">
+    Understand the sections used in templates
+  </Card>
+  <Card title="Modules" icon="cube" href="/modules/overview">
+    Learn about modules and components
+  </Card>
+</CardGroup>

@@ -1,0 +1,238 @@
+---
+title: theme.json
+description: Theme metadata and configuration file structure
+---
+
+The `theme.json` file contains metadata about your FreshJuice DEV theme, including theme information, responsive breakpoints, and preview settings.
+
+## File Location
+
+```
+theme/theme.json
+```
+
+## Complete Structure
+
+```json theme.json
+{
+  "label": "FreshJuice DEV",
+  "version": "3.0.0",
+  "author": {
+    "name": "Alex Zappa",
+    "email": "alex@zappa.dev",
+    "url": "https://alex.zappa.dev"
+  },
+  "documentation_url": "https://github.com/freshjuice-dev/freshjuice-dev-hubspot-theme",
+  "example_url": "https://143910617.hs-sites-eu1.com",
+  "preview_path": "./templates/home.html",
+  "screenshot_path": "./images/template-previews/blog-index.png",
+  "enable_domain_stylesheets": false,
+  "license": "MIT",
+  "responsive_breakpoints": [
+    {
+      "name": "mobile",
+      "mediaQuery": "@media (max-width: 767px)",
+      "previewWidth": {
+        "value": 375
+      }
+    }
+  ]
+}
+```
+
+## Field Reference
+
+### Theme Information
+
+<ParamField path="label" type="string" required>
+  The display name of the theme shown in the HubSpot design manager.
+  
+  **Default:** `"FreshJuice DEV"`
+</ParamField>
+
+<ParamField path="version" type="string" required>
+  The current version of the theme following [Semantic Versioning](https://semver.org/).
+  
+  **Format:** `MAJOR.MINOR.PATCH`
+  
+  **Example:** `"3.0.0"`
+  
+  <Note>
+    This version is automatically updated when you run `npm run version:patch`, `npm run version:minor`, or `npm run version:major`.
+  </Note>
+</ParamField>
+
+<ParamField path="license" type="string">
+  The license under which the theme is distributed.
+  
+  **Default:** `"MIT"`
+</ParamField>
+
+### Author Information
+
+<ParamField path="author" type="object">
+  Information about the theme author.
+  
+  <Expandable title="properties">
+    <ParamField path="name" type="string">
+      The author's full name.
+    </ParamField>
+    
+    <ParamField path="email" type="string">
+      Contact email address.
+    </ParamField>
+    
+    <ParamField path="url" type="string">
+      Personal website or portfolio URL.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+### URLs
+
+<ParamField path="documentation_url" type="string">
+  Link to the theme documentation. This appears in the HubSpot design manager.
+  
+  **Default:** `"https://github.com/freshjuice-dev/freshjuice-dev-hubspot-theme"`
+</ParamField>
+
+<ParamField path="example_url" type="string">
+  Link to a live demo site using this theme.
+</ParamField>
+
+### Preview Configuration
+
+<ParamField path="preview_path" type="string">
+  The default template to display when previewing the theme in the design manager.
+  
+  **Default:** `"./templates/home.html"`
+  
+  **Path Format:** Relative to the theme root directory
+</ParamField>
+
+<ParamField path="screenshot_path" type="string">
+  Path to the theme screenshot image displayed in the theme marketplace and design manager.
+  
+  **Default:** `"./images/template-previews/blog-index.png"`
+  
+  **Recommended Size:** 1200x900 pixels (4:3 aspect ratio)
+</ParamField>
+
+### Styling Options
+
+<ParamField path="enable_domain_stylesheets" type="boolean">
+  Whether to enable domain-specific stylesheets.
+  
+  **Default:** `false`
+  
+  <Info>
+    When enabled, you can create separate CSS files for different domains using the same theme. This is useful for white-label implementations.
+  </Info>
+</ParamField>
+
+### Responsive Breakpoints
+
+<ParamField path="responsive_breakpoints" type="array">
+  Defines responsive breakpoints for preview mode in the HubSpot page editor.
+  
+  <Expandable title="breakpoint object">
+    <ParamField path="name" type="string">
+      A unique identifier for the breakpoint (e.g., `"mobile"`, `"tablet"`, `"desktop"`).
+    </ParamField>
+    
+    <ParamField path="mediaQuery" type="string">
+      The CSS media query that defines when this breakpoint is active.
+      
+      **Example:** `"@media (max-width: 767px)"`
+    </ParamField>
+    
+    <ParamField path="previewWidth" type="object">
+      The viewport width to use when previewing this breakpoint.
+      
+      <Expandable title="properties">
+        <ParamField path="value" type="number">
+          Width in pixels.
+          
+          **Example:** `375` (iPhone viewport width)
+        </ParamField>
+      </Expandable>
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Default Breakpoint
+
+FreshJuice DEV includes one responsive breakpoint by default:
+
+| Name | Media Query | Preview Width |
+|------|-------------|---------------|
+| mobile | `@media (max-width: 767px)` | 375px |
+
+This aligns with Tailwind CSS's default `md:` breakpoint (768px).
+
+## Adding Custom Breakpoints
+
+To add additional breakpoints (e.g., tablet, desktop), extend the `responsive_breakpoints` array:
+
+```json
+{
+  "responsive_breakpoints": [
+    {
+      "name": "mobile",
+      "mediaQuery": "@media (max-width: 767px)",
+      "previewWidth": {
+        "value": 375
+      }
+    },
+    {
+      "name": "tablet",
+      "mediaQuery": "@media (min-width: 768px) and (max-width: 1023px)",
+      "previewWidth": {
+        "value": 768
+      }
+    },
+    {
+      "name": "desktop",
+      "mediaQuery": "@media (min-width: 1024px)",
+      "previewWidth": {
+        "value": 1440
+      }
+    }
+  ]
+}
+```
+
+<Warning>
+  After modifying `theme.json`, you must re-upload the theme to HubSpot using `npm run upload:hubspot` for changes to take effect.
+</Warning>
+
+## Version Management
+
+The `version` field is automatically synchronized with `package.json` when you run version bump scripts:
+
+<CodeGroup>
+```bash Patch (3.0.0 → 3.0.1)
+npm run version:patch
+```
+
+```bash Minor (3.0.0 → 3.1.0)
+npm run version:minor
+```
+
+```bash Major (3.0.0 → 4.0.0)
+npm run version:major
+```
+</CodeGroup>
+
+See the [Version Management guide](/guides/version-management) for details.
+
+## Related Configuration
+
+<CardGroup cols={2}>
+  <Card title="Theme Fields" icon="palette" href="/api/theme-fields">
+    Global color, font, and style configuration
+  </Card>
+  <Card title="Version Management" icon="code-branch" href="/guides/version-management">
+    Guide to managing theme versions
+  </Card>
+</CardGroup>

@@ -1,0 +1,199 @@
+---
+title: HubSpot CLI Guide
+description: Learn how to use the HubSpot CLI to authenticate, upload, watch, and fetch theme files for FreshJuice DEV.
+---
+
+The HubSpot CLI is essential for local development and deployment of FreshJuice DEV. This guide covers authentication, file syncing, and common workflows.
+
+## Prerequisites
+
+Before using the HubSpot CLI, ensure you have:
+
+- Node.js v22.0.0 or newer installed
+- [HubSpot CMS CLI](https://developers.hubspot.com/docs/cms/developer-reference/local-development-cli) installed globally
+- Access to a HubSpot account with CMS Hub
+
+## Authentication
+
+<Steps>
+  <Step title="Authenticate with HubSpot">
+    Run the authentication command to connect your local environment to HubSpot:
+    
+    ```bash
+    hs auth
+    ```
+    
+    This will prompt you to:
+    - Enter your HubSpot account ID
+    - Authorize via browser
+    - Name your authentication profile
+  </Step>
+  
+  <Step title="Verify authentication">
+    Check your authenticated accounts:
+    
+    ```bash
+    hs accounts list
+    ```
+    
+    Set a default account if needed:
+    
+    ```bash
+    hs accounts use
+    ```
+  </Step>
+</Steps>
+
+## Uploading Theme Files
+
+Upload your compiled theme to HubSpot manually.
+
+<Steps>
+  <Step title="Build your theme first">
+    Always build before uploading:
+    
+    ```bash
+    npm run build
+    ```
+    
+    This compiles Tailwind CSS, bundles JavaScript, and creates a production-ready build.
+  </Step>
+  
+  <Step title="Upload to HubSpot">
+    Upload the theme directory to your HubSpot account:
+    
+    ```bash
+    npm run upload:hubspot
+    ```
+    
+    This runs:
+    ```bash
+    hs upload ./theme /FreshJuiceDEV
+    ```
+    
+    The theme files from `./theme` are uploaded to `/FreshJuiceDEV` in your HubSpot portal.
+  </Step>
+</Steps>
+
+## Watching for Changes
+
+During development, use watch mode to automatically sync changes to HubSpot.
+
+<Steps>
+  <Step title="Start watch mode">
+    Watch the theme directory and auto-upload changes:
+    
+    ```bash
+    npm run watch:hubspot
+    ```
+    
+    This runs:
+    ```bash
+    hs watch ./theme /FreshJuiceDEV
+    ```
+  </Step>
+  
+  <Step title="Run full development environment">
+    For the complete development experience, run all watchers in parallel:
+    
+    ```bash
+    npm start
+    ```
+    
+    This starts:
+    - `watch:hubspot` - Auto-uploads theme changes
+    - `watch:tailwind` - Recompiles Tailwind CSS on changes
+    - `watch:js` - Rebundles JavaScript on changes
+  </Step>
+</Steps>
+
+<Info>
+The `npm start` command uses `npm-run-all --parallel watch:*` to run all watch tasks simultaneously.
+</Info>
+
+## Fetching from HubSpot
+
+Download theme files from your HubSpot portal to your local environment.
+
+<Steps>
+  <Step title="Fetch theme files">
+    Download the theme from HubSpot:
+    
+    ```bash
+    npm run fetch:hubspot
+    ```
+    
+    This runs:
+    ```bash
+    hs fetch --overwrite /FreshJuice ./theme && ./scripts/post-fetch.sh
+    ```
+  </Step>
+  
+  <Step title="Post-fetch cleanup">
+    The `post-fetch.sh` script automatically runs after fetching to:
+    - Remove `module_id` fields from module meta.json files
+    - Clean up HubSpot-generated metadata
+    
+    This ensures your local files stay clean and version-control friendly.
+  </Step>
+</Steps>
+
+<Warning>
+The `--overwrite` flag will replace local files with remote versions. Make sure you've committed any local changes before fetching.
+</Warning>
+
+## Common CLI Commands
+
+### Direct HubSpot CLI Usage
+
+Beyond the npm scripts, you can use HubSpot CLI commands directly:
+
+```bash
+# Create a new module
+hs create module
+
+# Create a new template
+hs create template
+
+# List files in HubSpot
+hs filemanager list /FreshJuiceDEV
+
+# View logs
+hs logs
+```
+
+### Troubleshooting
+
+**Authentication issues:**
+```bash
+# Re-authenticate
+hs auth
+
+# Clear auth and start fresh
+hs auth --account=YOUR_ACCOUNT_ID
+```
+
+**Upload failures:**
+```bash
+# Check HubSpot CLI status
+hs --version
+
+# Verify account connection
+hs accounts list
+```
+
+**Watch mode not syncing:**
+- Ensure you're watching the correct directory (`./theme`)
+- Check that the remote path exists (`/FreshJuiceDEV`)
+- Restart the watch process
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Building for Production" icon="hammer" href="/guides/building-theme">
+    Learn how to create production-ready builds
+  </Card>
+  <Card title="Version Management" icon="tag" href="/guides/version-management">
+    Manage theme versions with automated scripts
+  </Card>
+</CardGroup>

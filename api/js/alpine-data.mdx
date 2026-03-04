@@ -1,0 +1,316 @@
+---
+title: "Alpine.data (xDOM)"
+description: "Alpine.js data component providing DOM and utility methods"
+---
+
+## Overview
+
+The `xDOM` component is an Alpine.data component that exposes utility functions for DOM manipulation, script loading, debugging, and URL parameter handling. It makes FreshJuice utilities accessible within Alpine.js templates.
+
+## Location
+
+```
+source/js/modules/Alpine.data/DOM.js
+```
+
+## Registration
+
+The component is registered in `main.js`:
+
+```javascript
+import dataDOM from "./modules/Alpine.data/DOM";
+Alpine.data("xDOM", dataDOM);
+```
+
+## Usage
+
+Access the component using Alpine's `x-data` directive:
+
+```html
+<div x-data="xDOM">
+  <!-- Component methods are now available -->
+  <button @click="scrollToTop()">Back to Top</button>
+</div>
+```
+
+## Available Methods
+
+### debugLog
+
+Conditional debug logging with cocktail emoji prefix.
+
+**Signature:**
+```javascript
+debugLog(...args)
+```
+
+<ParamField path="...args" type="any">
+  Variable arguments to log to console
+</ParamField>
+
+**Example:**
+```html
+<button @click="debugLog('Button clicked!', $event)">
+  Debug Me
+</button>
+```
+
+**See:** [debugLog documentation](/api/js/debug-log)
+
+---
+
+### _GET
+
+Retrieve URL query parameters.
+
+**Signature:**
+```javascript
+_GET(param = false, url = false)
+```
+
+<ParamField path="param" type="string | false" default="false">
+  Specific parameter name to retrieve. If `false`, returns all parameters as an object.
+</ParamField>
+
+<ParamField path="url" type="string | false" default="false">
+  URL to parse. If `false`, uses current window location.
+</ParamField>
+
+**Returns:** `string | object | null`
+- String: Value of the specific parameter
+- Object: All query parameters (if `param=false`)
+- null: Parameter doesn't exist
+
+**Examples:**
+
+<CodeGroup>
+
+```html Get Single Parameter
+<!-- URL: https://example.com?category=shoes&color=red -->
+<div x-data="xDOM" x-init="console.log(_GET('category'))">
+  <!-- Logs: "shoes" -->
+</div>
+```
+
+```html Get All Parameters
+<!-- URL: https://example.com?category=shoes&color=red -->
+<div x-data="xDOM" x-init="console.log(_GET())">
+  <!-- Logs: { category: "shoes", color: "red" } -->
+</div>
+```
+
+```html Parse Custom URL
+<div x-data="xDOM">
+  <button @click="console.log(_GET('id', 'https://example.com?id=123'))">
+    Get ID from URL
+  </button>
+  <!-- Logs: "123" -->
+</div>
+```
+
+</CodeGroup>
+
+---
+
+### loadScript
+
+Dynamically load external JavaScript files.
+
+**Signature:**
+```javascript
+loadScript(src, loading = "defer", callback, callbackForced)
+```
+
+<ParamField path="src" type="string" required>
+  URL of the script to load
+</ParamField>
+
+<ParamField path="loading" type="string" default="defer">
+  Loading strategy: `"defer"` or `"async"`
+</ParamField>
+
+<ParamField path="callback" type="function">
+  Function to execute after script loads
+</ParamField>
+
+<ParamField path="callbackForced" type="boolean" default="false">
+  Execute callback even if script already loaded
+</ParamField>
+
+**Example:**
+```html
+<div x-data="xDOM">
+  <button @click="loadScript('https://cdn.example.com/chart.js', 'async', () => alert('Loaded!'))">
+    Load Chart Library
+  </button>
+</div>
+```
+
+**See:** [loadScript documentation](/api/js/load-script)
+
+---
+
+### loadStylesheet
+
+Dynamically load external CSS stylesheets.
+
+**Signature:**
+```javascript
+loadStylesheet(src, media, type)
+```
+
+<ParamField path="src" type="string" required>
+  URL of the stylesheet to load
+</ParamField>
+
+<ParamField path="media" type="string">
+  Media query for the stylesheet (e.g., `"print"`, `"screen"`)
+</ParamField>
+
+<ParamField path="type" type="string" default="text/css">
+  MIME type of the stylesheet
+</ParamField>
+
+**Example:**
+```html
+<div x-data="xDOM">
+  <button @click="loadStylesheet('https://cdn.example.com/theme.css')">
+    Load Theme
+  </button>
+  
+  <!-- Load print-specific styles -->
+  <button @click="loadStylesheet('print.css', 'print')">
+    Load Print Styles
+  </button>
+</div>
+```
+
+---
+
+### scrollToTop
+
+Smoothly scroll to the top of the page.
+
+**Signature:**
+```javascript
+scrollToTop()
+```
+
+**Example:**
+```html
+<div x-data="xDOM">
+  <button @click="scrollToTop()" class="fixed bottom-4 right-4">
+    ↑ Back to Top
+  </button>
+</div>
+```
+
+---
+
+### init
+
+Lifecycle hook called when the component initializes.
+
+**Signature:**
+```javascript
+init()
+```
+
+This method automatically runs when `x-data="xDOM"` is initialized and logs a debug message.
+
+## Complete Component Implementation
+
+```javascript
+import debugLog from "../_debugLog";
+import loadScript from "../_loadScript";
+import loadStylesheet from "../_loadStylesheet";
+import getSearchParams from "../_getSearchParams";
+
+export default () => {
+  return {
+    debugLog: (...args) => debugLog(...args),
+    
+    _GET: (param = false, url = false) => getSearchParams(param, url),
+    
+    loadScript: (src, loading = "defer", callback, callbackForced) => 
+      loadScript(src, loading, callback, callbackForced),
+    
+    loadStylesheet: (src, media, type) => loadStylesheet(src, media, type),
+    
+    scrollToTop: () => { 
+      window.scrollTo({ top: 0, behavior: 'smooth' }) 
+    },
+    
+    init() {
+      debugLog("AlpineJS DOM init");
+    },
+  };
+};
+```
+
+## Real-World Examples
+
+### Conditional Script Loading
+
+```html
+<div x-data="{
+  loaded: false,
+  loadMaps() {
+    this.$data.loadScript(
+      'https://maps.googleapis.com/maps/api/js',
+      'async',
+      () => { this.loaded = true; }
+    );
+  }
+}" x-merge="xDOM">
+  <button @click="loadMaps()" x-show="!loaded">Load Map</button>
+  <div x-show="loaded" x-init="initMap()">Map container</div>
+</div>
+```
+
+### URL Parameter Filtering
+
+```html
+<div x-data="xDOM" x-init="
+  category = _GET('category');
+  if (category) debugLog('Filtering by:', category);
+">
+  <p x-text="category ? `Showing: ${category}` : 'All items'"></p>
+</div>
+```
+
+### Dynamic Theme Switcher
+
+```html
+<div x-data="{ 
+  theme: 'light',
+  switchTheme(name) {
+    this.theme = name;
+    this.$data.loadStylesheet(`/themes/${name}.css`);
+  }
+}" x-merge="xDOM">
+  <button @click="switchTheme('dark')">Dark Mode</button>
+  <button @click="switchTheme('light')">Light Mode</button>
+</div>
+```
+
+## Best Practices
+
+<Note>
+- Use `xDOM` as a base component for common utilities
+- Combine with custom `x-data` using Alpine's merge syntax
+- Access methods via `this.$data.methodName()` in custom components
+- All methods are available immediately when component initializes
+</Note>
+
+<Warning>
+- The `init()` method runs automatically - don't call it manually
+- Method names starting with underscore (`_GET`) are intentional to avoid conflicts
+- When merging with custom data, ensure method names don't conflict
+</Warning>
+
+## Related
+
+- [main.js](/api/js/main) - Registers the xDOM component
+- [debugLog](/api/js/debug-log) - Debug logging utility
+- [loadScript](/api/js/load-script) - Script loading utility

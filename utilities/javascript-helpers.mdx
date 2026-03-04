@@ -1,0 +1,429 @@
+---
+title: 'JavaScript Helpers'
+description: 'Utility JavaScript modules for common operations'
+icon: 'code'
+---
+
+## Overview
+
+The FreshJuice theme includes several JavaScript utility modules that provide common functionality for client-side operations. These modules are located in `source/js/modules/` and are available throughout the theme.
+
+## Available Modules
+
+### loadScript
+
+Dynamically loads external JavaScript files into the document. Prevents duplicate script loading and supports both async and defer loading strategies.
+
+**Location:** `source/js/modules/_loadScript.js`
+
+#### Parameters
+
+- `src` (string, required): URL of the script to load
+- `loading` (string, optional): Loading strategy - `"defer"` (default) or `"async"`
+- `callback` (function, optional): Function to execute when script finishes loading
+- `callbackForced` (boolean, optional): Force callback execution even if script already exists (default: `false`)
+
+#### Usage
+
+```javascript
+const loadScript = require('./_loadScript');
+
+// Basic usage - load a script with defer
+loadScript('https://example.com/script.js');
+
+// Load with async strategy
+loadScript('https://example.com/script.js', 'async');
+
+// Load with callback
+loadScript('https://example.com/analytics.js', 'defer', () => {
+  console.log('Analytics script loaded!');
+  initializeAnalytics();
+});
+
+// Protocol-relative URLs are automatically converted to HTTPS
+loadScript('//cdn.example.com/library.js');
+
+// Relative URLs are converted to HTTPS
+loadScript('cdn.example.com/library.js');
+```
+
+#### Features
+
+- **Automatic protocol handling**: Converts protocol-relative and relative URLs to HTTPS
+- **Duplicate prevention**: Checks if script is already loaded before adding
+- **Cross-origin support**: Adds `crossOrigin="anonymous"` attribute
+- **Callback support**: Execute functions after script loads
+- **Force callback option**: Run callback even if script was previously loaded
+
+#### Example: Loading Google Maps
+
+```javascript
+const loadScript = require('./_loadScript');
+
+function initMap() {
+  const map = new google.maps.Map(document.getElementById('map'), {
+    center: { lat: -34.397, lng: 150.644 },
+    zoom: 8
+  });
+}
+
+loadScript(
+  'https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY',
+  'async',
+  initMap
+);
+```
+
+---
+
+### loadStylesheet
+
+Dynamically loads external CSS stylesheets into the document. Prevents duplicate stylesheet loading and supports media queries.
+
+**Location:** `source/js/modules/_loadStylesheet.js`
+
+#### Parameters
+
+- `src` (string, required): URL of the stylesheet to load
+- `media` (string, optional): Media query for the stylesheet
+- `type` (string, optional): Type attribute (default: `"text/css"`)
+
+#### Usage
+
+```javascript
+const loadStylesheet = require('./_loadStylesheet');
+
+// Basic usage
+loadStylesheet('https://example.com/styles.css');
+
+// Load with media query
+loadStylesheet('https://example.com/print.css', 'print');
+
+// Load responsive stylesheet
+loadStylesheet(
+  'https://example.com/mobile.css',
+  '(max-width: 768px)'
+);
+
+// Protocol-relative URLs are automatically converted to HTTPS
+loadStylesheet('//fonts.googleapis.com/css?family=Roboto');
+```
+
+#### Features
+
+- **Automatic protocol handling**: Converts protocol-relative and relative URLs to HTTPS
+- **Duplicate prevention**: Checks if stylesheet is already loaded
+- **Media query support**: Load stylesheets conditionally based on media queries
+- **Appends to head**: Stylesheets are added to `<head>` for proper cascade
+
+#### Example: Loading Google Fonts
+
+```javascript
+const loadStylesheet = require('./_loadStylesheet');
+
+loadStylesheet(
+  'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap'
+);
+```
+
+---
+
+### debugLog
+
+Conditional logging utility that only outputs to console in development environments or when debugging is explicitly enabled.
+
+**Location:** `source/js/modules/_debugLog.js`
+
+#### Parameters
+
+- `...args` (any): Arguments to log to the console
+
+#### Usage
+
+```javascript
+const debugLog = require('./_debugLog');
+
+// Basic logging
+debugLog('User clicked button');
+
+// Log multiple arguments
+debugLog('Form data:', formData, 'Validation result:', isValid);
+
+// Log objects
+const userData = { name: 'John', email: 'john@example.com' };
+debugLog('User data:', userData);
+
+// Log errors
+debugLog('Error occurred:', error.message);
+```
+
+#### When Logs Appear
+
+Logs are displayed in the console when either:
+1. The hostname contains `.hs-sites` or `.hubspot` (HubSpot preview/staging environments)
+2. `sessionStorage.juice` is set (manual debugging mode)
+
+#### Features
+
+- **Environment-aware**: Only logs in development/staging environments
+- **Manual override**: Enable logging by setting `sessionStorage.juice = true` in console
+- **Visual identifier**: All logs are prefixed with 🍹 emoji for easy identification
+- **Multiple arguments**: Supports logging multiple values at once
+
+#### Enable Manual Debugging
+
+To enable debug logging in production, run this in the browser console:
+
+```javascript
+sessionStorage.juice = true;
+// Refresh the page to see debug logs
+```
+
+To disable:
+
+```javascript
+delete sessionStorage.juice;
+// Refresh the page
+```
+
+---
+
+### getSearchParams
+
+Extracts and parses URL query parameters. Can retrieve a specific parameter or all parameters as an object.
+
+**Location:** `source/js/modules/_getSearchParams.js`
+
+#### Parameters
+
+- `param` (string, optional): Specific parameter to retrieve (default: `false` - returns all)
+- `url` (string, optional): URL to parse (default: `false` - uses current window location)
+
+#### Returns
+
+- If `param` specified: Returns parameter value (string) or `null` if not found
+- If `param` not specified: Returns object with all parameters
+
+#### Usage
+
+```javascript
+const getSearchParams = require('./_getSearchParams');
+
+// URL: https://example.com/page?name=John&age=30&city=NYC
+
+// Get all parameters
+const allParams = getSearchParams();
+console.log(allParams);
+// Output: { name: 'John', age: '30', city: 'NYC' }
+
+// Get specific parameter
+const name = getSearchParams('name');
+console.log(name); // Output: 'John'
+
+// Get parameter that doesn't exist
+const country = getSearchParams('country');
+console.log(country); // Output: null
+
+// Parse parameters from a different URL
+const params = getSearchParams(
+  false,
+  'https://example.com/page?source=email&campaign=summer'
+);
+console.log(params);
+// Output: { source: 'email', campaign: 'summer' }
+
+// Get specific parameter from custom URL
+const source = getSearchParams(
+  'source',
+  'https://example.com/page?source=email&campaign=summer'
+);
+console.log(source); // Output: 'email'
+```
+
+#### Features
+
+- **Flexible parsing**: Get all parameters or a specific one
+- **Custom URL support**: Parse any URL, not just current page
+- **Hash handling**: Automatically removes hash fragments before parsing
+- **Empty value handling**: Parameters without values default to empty string
+- **Debug logging**: Logs operations when debug mode is enabled
+
+#### Example: UTM Parameter Tracking
+
+```javascript
+const getSearchParams = require('./_getSearchParams');
+const debugLog = require('./_debugLog');
+
+// Track UTM parameters for analytics
+const utmSource = getSearchParams('utm_source');
+const utmMedium = getSearchParams('utm_medium');
+const utmCampaign = getSearchParams('utm_campaign');
+
+if (utmSource) {
+  debugLog('Traffic source:', utmSource);
+  
+  // Store in sessionStorage for cross-page tracking
+  sessionStorage.setItem('utm_source', utmSource);
+  sessionStorage.setItem('utm_medium', utmMedium || '');
+  sessionStorage.setItem('utm_campaign', utmCampaign || '');
+}
+```
+
+#### Example: Form Pre-filling
+
+```javascript
+const getSearchParams = require('./_getSearchParams');
+
+// Pre-fill form from URL parameters
+// URL: /contact?name=John&email=john@example.com
+
+const params = getSearchParams();
+
+if (params.name) {
+  document.querySelector('input[name="name"]').value = params.name;
+}
+
+if (params.email) {
+  document.querySelector('input[name="email"]').value = params.email;
+}
+```
+
+---
+
+## Common Patterns
+
+### Lazy Loading Third-Party Scripts
+
+Load heavy third-party scripts only when needed:
+
+```javascript
+const loadScript = require('./_loadScript');
+const debugLog = require('./_debugLog');
+
+function initVideoPlayer() {
+  loadScript(
+    'https://player.vimeo.com/api/player.js',
+    'async',
+    () => {
+      debugLog('Vimeo player loaded');
+      const player = new Vimeo.Player('video-container');
+    }
+  );
+}
+
+// Load only when user clicks play button
+document.querySelector('.video-play-btn').addEventListener('click', initVideoPlayer);
+```
+
+### Conditional Feature Loading
+
+Load features based on URL parameters:
+
+```javascript
+const getSearchParams = require('./_getSearchParams');
+const loadScript = require('./_loadScript');
+const debugLog = require('./_debugLog');
+
+const debugMode = getSearchParams('debug');
+
+if (debugMode === 'true') {
+  debugLog('Debug mode enabled via URL parameter');
+  
+  // Load debugging tools
+  loadScript('https://cdn.example.com/debug-tools.js', 'async', () => {
+    window.debugTools.init();
+  });
+}
+```
+
+### Dynamic Theme Loading
+
+Load different stylesheets based on user preferences:
+
+```javascript
+const loadStylesheet = require('./_loadStylesheet');
+const getSearchParams = require('./_getSearchParams');
+
+const theme = getSearchParams('theme') || localStorage.getItem('theme') || 'light';
+
+if (theme === 'dark') {
+  loadStylesheet('https://example.com/themes/dark.css');
+}
+```
+
+---
+
+## Best Practices
+
+### 1. Use Debug Logging During Development
+
+```javascript
+const debugLog = require('./_debugLog');
+
+// Log important state changes
+debugLog('Module initialized', moduleConfig);
+
+// Log user interactions
+button.addEventListener('click', () => {
+  debugLog('Button clicked', button.dataset);
+});
+```
+
+### 2. Prevent Duplicate Script Loads
+
+`loadScript` and `loadStylesheet` automatically prevent duplicates, but you can also check manually:
+
+```javascript
+const loadScript = require('./_loadScript');
+
+if (!window.myLibrary) {
+  loadScript('https://example.com/library.js', 'async', () => {
+    window.myLibrary.init();
+  });
+}
+```
+
+### 3. Handle Loading Errors
+
+While the modules don't have built-in error handling, you can add it:
+
+```javascript
+const loadScript = require('./_loadScript');
+
+try {
+  loadScript('https://example.com/script.js', 'async', () => {
+    if (typeof expectedFunction === 'undefined') {
+      console.error('Script loaded but expected function not found');
+    }
+  });
+} catch (error) {
+  console.error('Failed to load script:', error);
+}
+```
+
+### 4. Centralize Third-Party Dependencies
+
+Create a dedicated module for managing all external dependencies:
+
+```javascript
+// dependencies.js
+const loadScript = require('./_loadScript');
+
+module.exports = {
+  loadGoogleMaps: (callback) => {
+    loadScript(
+      'https://maps.googleapis.com/maps/api/js?key=YOUR_KEY',
+      'async',
+      callback
+    );
+  },
+  
+  loadAnalytics: (callback) => {
+    loadScript(
+      'https://www.google-analytics.com/analytics.js',
+      'async',
+      callback
+    );
+  }
+};
+```
