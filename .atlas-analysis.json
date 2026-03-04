@@ -1,0 +1,156 @@
+{
+  "projectType": "framework",
+  "projectName": "FreshJuice DEV",
+  "projectDescription": "A developer starter theme for HubSpot CMS with Tailwind CSS, Alpine.js, and extra utilities to accelerate custom theme development.",
+  "theme": "palm",
+  "primaryColor": "#f1a431",
+  "lightColor": "#559c1d",
+  "darkColor": "#f4f3e9",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/project-structure",
+              "concepts/theme-architecture",
+              "concepts/build-process"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "development/local-setup",
+              "development/tailwind-css",
+              "development/alpine-js",
+              "development/hubl-templates"
+            ]
+          },
+          {
+            "group": "Modules",
+            "pages": [
+              "modules/overview",
+              "modules/content-modules",
+              "modules/navigation-modules",
+              "modules/blog-modules",
+              "modules/testimonials-modules"
+            ]
+          },
+          {
+            "group": "Templates",
+            "pages": [
+              "templates/overview",
+              "templates/page-templates",
+              "templates/blog-templates",
+              "templates/system-templates"
+            ]
+          },
+          {
+            "group": "Utilities",
+            "pages": [
+              "utilities/hubl-macros",
+              "utilities/javascript-helpers",
+              "utilities/css-utilities"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "HubL Macros",
+            "pages": [
+              "api/macros/slugify",
+              "api/macros/unique-id",
+              "api/macros/minutes-to-read",
+              "api/macros/random-int"
+            ]
+          },
+          {
+            "group": "JavaScript Modules",
+            "pages": [
+              "api/js/main",
+              "api/js/debug-log",
+              "api/js/load-script",
+              "api/js/alpine-data"
+            ]
+          },
+          {
+            "group": "Theme Configuration",
+            "pages": [
+              "api/theme-fields",
+              "api/theme-json"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Customization",
+            "pages": [
+              "guides/creating-modules",
+              "guides/styling-components",
+              "guides/adding-javascript",
+              "guides/theme-fields"
+            ]
+          },
+          {
+            "group": "Deployment",
+            "pages": [
+              "guides/hubspot-cli",
+              "guides/building-theme",
+              "guides/version-management"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "guides/custom-sections",
+              "guides/performance-optimization",
+              "guides/husky-hooks"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Tailwind CSS 4.x integration with custom theme configuration",
+    "Alpine.js with plugins (collapse, focus, intersect)",
+    "37 pre-built HubSpot modules (buttons, cards, testimonials, pricing, etc.)",
+    "Custom HubL macros (slugify, unique-id, minutes-to-read)",
+    "Multiple page templates (blog, landing page, home, pricing)",
+    "HubSpot CLI integration with watch mode",
+    "esbuild bundling for JavaScript",
+    "Flying Pages prefetching for fast navigation",
+    "Responsive design with mobile breakpoints",
+    "Version management scripts"
+  ],
+  "publicApiSurface": [
+    "slugify(text)",
+    "unique_id()",
+    "minutes_to_read()",
+    "random_int()",
+    "Alpine.data('xDOM')",
+    "loadScript(url, position, callback)",
+    "debugLog(...args)",
+    "npm run start - Local development with watch mode",
+    "npm run build - Production build",
+    "npm run upload:hubspot - Upload to HubSpot",
+    "npm run watch:hubspot - Watch and sync to HubSpot",
+    "npm run version:patch|minor|major - Bump theme version"
+  ]
+}
